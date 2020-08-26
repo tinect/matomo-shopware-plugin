@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/master/src/Core/System/SystemConfig/Schema/config.xsd">
+    <card>
+        <title>Jinya Matomo Tracking</title>
+        <input-field>
+            <name>matomoserver</name>
+            <label lang="de-DE">Matomo Server</label>
+            <label lang="en-GB">Matomo Server</label>
+            <helpText lang="de-DE">Der Server auf dem deine Matomoinsatz läuft</helpText>
+            <helpText lang="en-GB">The server that is running your matomo instance</helpText>
+            <required>true</required>
+        </input-field>
+        <input-field>
+            <name>matomosite</name>
+            <label lang="de-DE">Matomo Site-ID</label>
+            <label lang="en-GB">Matomo Site-ID</label>
+            <helpText lang="de-DE">Die ID deiner Matomosite</helpText>
+            <helpText lang="en-GB">The ID of your matomo site</helpText>
+            <required>true</required>
+        </input-field>
+    </card>
+</config>
