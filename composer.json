@@ -1,5 +1,5 @@
 {
-  "name": "swag/plugin-skeleton",
+  "name": "jinya/matomo-shopware-plugin",
   "description": "Skeleton plugin",
   "type": "shopware-platform-plugin",
   "license": "MIT",
