@@ -1,7 +1,7 @@
 {% sw_extends "@Storefront/storefront/base.html.twig" %}
 {% block base_body %}
     {{ parent() }}
-    <script type="text/javascript">
+    <script>
         window._paq = window._paq || [];
         {% if activeRoute == "frontend.detail.page" %}
         window._paq.push([
@@ -53,16 +53,18 @@
             {% set jsTrackingPath = 'matomo.js' %}
         {% endif %}
 
-        const u = '//{{ shopware.config.JinyaMatomo.config.matomoserver }}/';
+        {% if shopware.config.JinyaMatomo.config.matomoserver %}
+            const u = '//{{ shopware.config.JinyaMatomo.config.matomoserver }}/';
 
-        _paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
-        _paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
-        (function () {
-            const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-            g.type = 'text/javascript';
-            g.async = true;
-            g.src = u + '{{ jsTrackingPath }}';
-            s.parentNode.insertBefore(g, s);
-        })();
+            _paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
+            _paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
+            (function () {
+                const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+                g.type = 'text/javascript';
+                g.async = true;
+                g.src = u + '{{ jsTrackingPath }}';
+                s.parentNode.insertBefore(g, s);
+            })();
+        {% endif %}
     </script>
 {% endblock %}
