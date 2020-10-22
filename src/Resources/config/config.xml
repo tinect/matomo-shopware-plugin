@@ -12,6 +12,20 @@
             <required>true</required>
         </input-field>
         <input-field>
+            <name>phpTrackingPath</name>
+            <label lang="de-DE">Relativer Pfad zur matomo.php</label>
+            <label lang="en-GB">Relative path to matomo.php</label>
+            <required>true</required>
+            <defaultValue>matomo.php</defaultValue>
+        </input-field>
+        <input-field>
+            <name>jsTrackingPath</name>
+            <label lang="de-DE">Relativer Pfad zur matomo.js</label>
+            <label lang="en-GB">Relative path to matomo.js</label>
+            <required>true</required>
+            <defaultValue>matomo.js</defaultValue>
+        </input-field>
+        <input-field>
             <name>matomosite</name>
             <label lang="de-DE">Matomo Site-ID</label>
             <label lang="en-GB">Matomo Site-ID</label>

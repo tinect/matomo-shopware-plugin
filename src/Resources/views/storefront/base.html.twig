@@ -2,9 +2,9 @@
 {% block base_body %}
     {{ parent() }}
     <script type="text/javascript">
-        var _paq = window._paq = window._paq || [];
+        window._paq = window._paq || [];
         {% if activeRoute == "frontend.detail.page" %}
-        _paq.push([
+        window._paq.push([
             'setEcommerceView',
             '{{ page.product.productNumber|escape('js') }}',
             '{{ page.product.name|escape('js') }}',
@@ -14,7 +14,7 @@
 
         {% if page.order is defined %}
         {% for item in page.order.lineItems.elements %}
-            _paq.push([
+            window._paq.push([
                 'addEcommerceItem',
                 '{{ item.payload["productNumber"] }}',
                 '{{ item.label }}',
@@ -23,7 +23,7 @@
                 '{{ item.quantity }}',
             ]);
         {% endfor %}
-        _paq.push([
+        window._paq.push([
             'trackEcommerceOrder',
             '{{ page.order.orderNumber }}',
             {{ page.order.amountTotal }},
@@ -33,19 +33,31 @@
             false
         ]);
         {% endif %}
-        // we recommend to also track a page view on the Order confirmation page
-        _paq.push(['trackPageView']);
-        _paq.push(["disableCookies"]);
-        _paq.push(['trackPageView']);
-        _paq.push(['enableLinkTracking']);
-        var u = "//{{ shopware.config.JinyaMatomo.config.matomoserver }}/";
-        _paq.push(['setTrackerUrl', u + 'matomo.php']);
+        window._paq.push(["disableCookies"]);
+        window._paq.push(['trackPageView']);
+        window._paq.push(['enableLinkTracking']);
+
+        {% if shopware.config.JinyaMatomo.config.phpTrackingPath is defined %}
+            {% set phpTrackingPath = shopware.config.JinyaMatomo.config.phpTrackingPath %}
+        {% else %}
+            {% set phpTrackingPath = 'matomo.php' %}
+        {% endif %}
+
+        {% if shopware.config.JinyaMatomo.config.jsTrackingPath is defined %}
+            {% set jsTrackingPath = shopware.config.JinyaMatomo.config.jsTrackingPath %}
+        {% else %}
+            {% set jsTrackingPath = 'matomo.js' %}
+        {% endif %}
+
+        const u = '//{{ shopware.config.JinyaMatomo.config.matomoserver }}/';
+
+        _paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
         _paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
         (function () {
-            var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+            const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
             g.type = 'text/javascript';
             g.async = true;
-            g.src = u + 'matomo.js';
+            g.src = u + '{{ jsTrackingPath }}';
             s.parentNode.insertBefore(g, s);
         })();
     </script>
