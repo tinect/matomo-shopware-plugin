@@ -33,7 +33,11 @@
             false
         ]);
         {% endif %}
-        window._paq.push(["disableCookies"]);
+
+        {% if shopware.config.JinyaMatomo.config.disableCookies %}
+            window._paq.push(["disableCookies"]);
+        {% endif %}
+
         window._paq.push(['trackPageView']);
         window._paq.push(['enableLinkTracking']);
 
