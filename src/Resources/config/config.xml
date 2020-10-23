@@ -33,11 +33,5 @@
             <helpText lang="en-GB">The ID of your matomo site</helpText>
             <required>true</required>
         </input-field>
-        <input-field type="bool">
-            <name>disableCookies</name>
-            <label lang="de-DE">Deaktiviere Cookies</label>
-            <label lang="en-GB">disable Cookies</label>
-            <defaultValue>false</defaultValue>
-        </input-field>
     </card>
 </config>
