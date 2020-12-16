@@ -1,0 +1,6 @@
+{% sw_extends '@Storefront/storefront/layout/meta.html.twig' %}
+
+{% block layout_head_meta_tags %}
+    {{ parent() }}
+    <link rel="preconnect" crossorigin href="//{{ shopware.config.JinyaMatomo.config.matomoserver }}">
+{% endblock %}
