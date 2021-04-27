@@ -33,5 +33,23 @@
             <helpText lang="en-GB">The ID of your matomo site</helpText>
             <required>true</required>
         </input-field>
+
+        <input-field type="single-select">
+            <name>cookieStatus</name>
+            <defaultValue>acceptCookie</defaultValue>
+            <options>
+                <option>
+                    <id>acceptCookie</id>
+                    <name>Always use cookies</name>
+                    <name lang="de-DE">Benutze immer Cookies</name>
+                </option>
+                <option>
+                    <id>noCookie</id>
+                    <name>Track without cookies</name>
+                    <name lang="de-DE">Tracke ohne Cookies</name>
+                </option>
+            </options>
+            <label>Cookies</label>
+        </input-field>
     </card>
 </config>

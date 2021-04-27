@@ -1,5 +1,5 @@
 {% sw_extends "@Storefront/storefront/base.html.twig" %}
-{% block base_body %}
+{% block base_body_script %}
     {{ parent() }}
     <script>
         window._paq = window._paq || [];
@@ -33,7 +33,11 @@
             false
         ]);
         {% endif %}
-        window._paq.push(["disableCookies"]);
+
+        {% if shopware.config.JinyaMatomo.config.cookieStatus != 'acceptCookie' %}
+            window._paq.push(["disableCookies"]);
+        {% endif %}
+
         window._paq.push(['trackPageView']);
         window._paq.push(['enableLinkTracking']);
 
