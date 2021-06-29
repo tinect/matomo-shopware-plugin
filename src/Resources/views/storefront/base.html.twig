@@ -3,39 +3,37 @@
     {{ parent() }}
     <script>
         window._paq = window._paq || [];
+
         {% if activeRoute == "frontend.detail.page" %}
-        window._paq.push([
-            'setEcommerceView',
-            '{{ page.product.productNumber|escape('js') }}',
-            '{{ page.product.name|escape('js') }}',
-            ''
-        ]);
+            window._paq.push([
+                'setEcommerceView',
+                '{{ page.product.productNumber|escape('js') }}',
+                '{{ page.product.name|escape('js') }}',
+                ''
+            ]);
         {% endif %}
 
         {% if page.order is defined %}
-        {% for item in page.order.lineItems.elements %}
+            {% for item in page.order.lineItems.elements %}
+                window._paq.push([
+                    'addEcommerceItem',
+                    '{{ item.payload["productNumber"] }}',
+                    '{{ item.label }}',
+                    '',
+                    {{ item.totalPrice }},
+                    '{{ item.quantity }}',
+                ]);
+            {% endfor %}
             window._paq.push([
-                'addEcommerceItem',
-                '{{ item.payload["productNumber"] }}',
-                '{{ item.label }}',
-                '',
-                {{ item.totalPrice }},
-                '{{ item.quantity }}',
+                'trackEcommerceOrder',
+                '{{ page.order.orderNumber }}',
+                {{ page.order.amountTotal }},
+                {{ page.order.positionPrice }},
+                {{ page.order.amountTotal - page.order.amountNet }},
+                {{ page.order.shippingTotal }},
+                false
             ]);
-        {% endfor %}
-        window._paq.push([
-            'trackEcommerceOrder',
-            '{{ page.order.orderNumber }}',
-            {{ page.order.amountTotal }},
-            {{ page.order.positionPrice }},
-            {{ page.order.amountTotal - page.order.amountNet }},
-            {{ page.order.shippingTotal }},
-            false
-        ]);
         {% endif %}
-        window._paq.push(["disableCookies"]);
-        window._paq.push(['trackPageView']);
-        window._paq.push(['enableLinkTracking']);
 
         {% if shopware.config.JinyaMatomo.config.phpTrackingPath is defined %}
             {% set phpTrackingPath = shopware.config.JinyaMatomo.config.phpTrackingPath %}
@@ -49,11 +47,18 @@
             {% set jsTrackingPath = 'matomo.js' %}
         {% endif %}
 
+        window.mTrackCall = function() {
+            if (!window.matomoCookieActive) {
+                window._paq.push(["disableCookies"]);
+            }
+            window._paq.push(['trackPageView']);
+            window._paq.push(['enableLinkTracking']);
+        }
+
         {% if shopware.config.JinyaMatomo.config.matomoserver %}
             const u = '//{{ shopware.config.JinyaMatomo.config.matomoserver }}/';
-
-            _paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
-            _paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
+            window._paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
+            window._paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
             (function () {
                 const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
                 g.type = 'text/javascript';
