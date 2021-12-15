@@ -2,59 +2,80 @@ name: PackPlugin
 on:
     push:
         branches:
-            - '*'
-        tags:
-            - '*'
+            - 'main'
 
 env:
     PLUGIN_NAME: JinyaMatomo
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-    CreateZip:
+    pluginDeploy:
+        container: ghcr.io/friendsofshopware/platform-plugin-dev:v6.4.0
         runs-on: ubuntu-latest
-        container: ghcr.io/friendsofshopware/platform-plugin-dev:v6.3.2
         steps:
-            -   name: Get the version
-                id: get_version
-                run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+            - name: Checkout
+              uses: actions/checkout@v2.3.1
 
-            -   name: Checkout
-                uses: actions/checkout@v2.3.1
-                with:
-                    path: ${{ env.PLUGIN_NAME }}
+            - name: Build & create zip
+              run: |
+                  if test -f "./src/Resources/app/administration/package.json"; then
+                      npm install --prefix "./src/Resources/app/administration/"
+                  fi
+                  if test -f "./src/Resources/app/storefront/package.json"; then
+                      npm install --prefix "./src/Resources/app/storefront/"
+                  fi
+                  if test -f "./src/Resources/app/package.json"; then
+                      npm install --prefix "./src/Resources/app/"
+                  fi
+                  cp -r "./" "/plugins/${PLUGIN_NAME}"
+                  start-mysql
+                  pack-plugin "${PLUGIN_NAME}"
+            - name: Upload Artefact
+              uses: actions/upload-artifact@v2
+              with:
+                  name: ${{ env.PLUGIN_NAME }}
+                  path: ${{ env.PLUGIN_NAME }}.zip
 
-            -   name: Build & create zip
-                run: |
-                    cp -r "./${PLUGIN_NAME}" "/plugins/${PLUGIN_NAME}"
-                    start-mysql
-                    pack-plugin "${PLUGIN_NAME}"
+            - name: Unzip
+              run: |
+                  unzip -o -q "${PLUGIN_NAME}.zip" -d ./toDeploy
+                  find ./ -maxdepth 1 ! -name "toDeploy" ! -name ".git" ! -name "." ! -name ".." -exec rm -rf {} \;
+                  mv ./toDeploy/${PLUGIN_NAME}/* ./
+                  rm -rf ./toDeploy
+                  rm -rf ./.github
+            - name: Get version
+              run: |
+                  echo "PLUGIN_VERSION=$(jq ".version" composer.json -r)" >> $GITHUB_ENV
+            - uses: mukunku/tag-exists-action@v1.0.0
+              id: checkTag
+              with:
+                  tag: ${{ env.PLUGIN_VERSION }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            -   name: Upload Artefact
-                uses: actions/upload-artifact@v2
-                with:
-                    name: ${{ env.PLUGIN_NAME }}
-                    path: ${{ env.PLUGIN_NAME }}.zip
+            - name: Generate changelog
+              if: steps.checkTag.outputs.exists != 'true'
+              id: tag_version
+              uses: mathieudutour/github-tag-action@v6.0
+              with:
+                  tag_prefix: ""
+                  github_token: ${{ env.GITHUB_TOKEN }}
+                  custom_tag: ${{ env.PLUGIN_VERSION }}
+                  dry_run: true
 
-            -   name: Create Release in github
-                if: startsWith(github.ref, 'refs/tags/')
-                id: create_release
-                uses: actions/create-release@v1.0.0
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
-                    tag_name: ${{ steps.get_version.outputs.VERSION }}
-                    release_name: ${{ steps.get_version.outputs.VERSION }}
-                    draft: false
-                    prerelease: false
-
-            -   name: Upload Release Asset to github
-                if: startsWith(github.ref, 'refs/tags/')
-                id: upload_release_asset
-                uses: actions/upload-release-asset@v1.0.2
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
-                    upload_url: ${{ steps.create_release.outputs.upload_url }}
-                    asset_path: ${{ env.PLUGIN_NAME }}.zip
-                    asset_name: ${{ env.PLUGIN_NAME }}.zip
-                    asset_content_type: application/zip
+            - name: commit
+              if: steps.checkTag.outputs.exists != 'true'
+              run: |
+                  git config user.name "GitHub Actions Bot"
+                  git config user.email "<>"
+                  git add -f *
+                  git commit -m "chore: Build release"
+                  git tag ${PLUGIN_VERSION}
+                  git push origin ${PLUGIN_VERSION}
+            - name: Create a GitHub release
+              if: steps.checkTag.outputs.exists != 'true'
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: ${{ env.PLUGIN_VERSION }}
+                  name: ${{ env.PLUGIN_VERSION }}
+                  body: ${{ steps.tag_version.outputs.changelog }}

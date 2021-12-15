@@ -35,14 +35,14 @@
             ]);
         {% endif %}
 
-        {% if shopware.config.JinyaMatomo.config.phpTrackingPath is defined %}
-            {% set phpTrackingPath = shopware.config.JinyaMatomo.config.phpTrackingPath %}
+        {% if config("JinyaMatomo.config.phpTrackingPath") %}
+            {% set phpTrackingPath = config("JinyaMatomo.config.phpTrackingPath") %}
         {% else %}
             {% set phpTrackingPath = 'matomo.php' %}
         {% endif %}
 
-        {% if shopware.config.JinyaMatomo.config.jsTrackingPath is defined %}
-            {% set jsTrackingPath = shopware.config.JinyaMatomo.config.jsTrackingPath %}
+        {% if config("JinyaMatomo.config.jsTrackingPath") %}
+            {% set jsTrackingPath = config("JinyaMatomo.config.jsTrackingPath") %}
         {% else %}
             {% set jsTrackingPath = 'matomo.js' %}
         {% endif %}
@@ -55,10 +55,10 @@
             window._paq.push(['enableLinkTracking']);
         }
 
-        {% if shopware.config.JinyaMatomo.config.matomoserver %}
-            const u = '//{{ shopware.config.JinyaMatomo.config.matomoserver }}/';
+        {% if config("JinyaMatomo.config.matomoserver") %}
+            const u = '//{{ config("JinyaMatomo.config.matomoserver") }}/';
             window._paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
-            window._paq.push(['setSiteId', '{{ shopware.config.JinyaMatomo.config.matomosite }}']);
+            window._paq.push(['setSiteId', '{{ config("JinyaMatomo.config.matomosite") }}']);
             (function () {
                 const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
                 g.type = 'text/javascript';
