@@ -2,5 +2,5 @@
 
 {% block layout_head_meta_tags %}
     {{ parent() }}
-    <link rel="preconnect" crossorigin href="//{{ shopware.config.JinyaMatomo.config.matomoserver }}">
+    <link rel="preconnect" crossorigin href="//{{ config("JinyaMatomo.config.matomoserver") }}">
 {% endblock %}
