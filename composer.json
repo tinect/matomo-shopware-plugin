@@ -1,6 +1,6 @@
 {
   "name": "jinya/matomo-shopware-plugin",
-  "version": "0.0.4",
+  "version": "1.0.4",
   "description": "Matomo plugin for shopware 6",
   "type": "shopware-platform-plugin",
   "license": "MIT",
