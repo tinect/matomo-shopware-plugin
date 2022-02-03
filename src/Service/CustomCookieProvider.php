@@ -4,15 +4,8 @@ namespace JinyaMatomo\Service;
 
 use Shopware\Storefront\Framework\Cookie\CookieProviderInterface;
 
-class CustomCookieProvider implements CookieProviderInterface {
-
-    private $originalService;
-
-    public function __construct(CookieProviderInterface $service)
-    {
-        $this->originalService = $service;
-    }
-
+class CustomCookieProvider implements CookieProviderInterface
+{
     private const cookieGroup = [
         'snippet_name' => 'cookie.groupStatistical',
         'snippet_description' => 'cookie.groupStatisticalDescription',
@@ -23,9 +16,16 @@ class CustomCookieProvider implements CookieProviderInterface {
                 'cookie' => 'matomo-analytics-enabled',
                 'expiration' => '30',
                 'value' => '1',
-            ]
+            ],
         ],
     ];
+
+    private CookieProviderInterface $originalService;
+
+    public function __construct(CookieProviderInterface $service)
+    {
+        $this->originalService = $service;
+    }
 
     public function getCookieGroups(): array
     {
@@ -34,8 +34,10 @@ class CustomCookieProvider implements CookieProviderInterface {
         foreach ($cookieGroups as $key => $group) {
             if ($group['snippet_name'] === self::cookieGroup['snippet_name']) {
                 $cookieGroups[$key]['entries'] = array_merge(
-                    $group['entries'], self::cookieGroup['entries']
+                    $group['entries'],
+                    self::cookieGroup['entries']
                 );
+
                 return $cookieGroups;
             }
         }
@@ -43,7 +45,7 @@ class CustomCookieProvider implements CookieProviderInterface {
         return array_merge(
             $cookieGroups,
             [
-                self::cookieGroup
+                self::cookieGroup,
             ]
         );
     }

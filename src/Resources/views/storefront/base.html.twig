@@ -35,15 +35,13 @@
             ]);
         {% endif %}
 
-        {% if config("JinyaMatomo.config.phpTrackingPath") %}
-            {% set phpTrackingPath = config("JinyaMatomo.config.phpTrackingPath") %}
-        {% else %}
+        {% set phpTrackingPath = config("JinyaMatomo.config.phpTrackingPath") %}
+        {% if phpTrackingPath is empty %}
             {% set phpTrackingPath = 'matomo.php' %}
         {% endif %}
 
-        {% if config("JinyaMatomo.config.jsTrackingPath") %}
-            {% set jsTrackingPath = config("JinyaMatomo.config.jsTrackingPath") %}
-        {% else %}
+        {% set jsTrackingPath = config("JinyaMatomo.config.jsTrackingPath") %}
+        {% if jsTrackingPath is empty %}
             {% set jsTrackingPath = 'matomo.js' %}
         {% endif %}
 
@@ -55,15 +53,24 @@
             window._paq.push(['enableLinkTracking']);
         }
 
-        {% if config("JinyaMatomo.config.matomoserver") %}
-            const u = '//{{ config("JinyaMatomo.config.matomoserver") }}/';
-            window._paq.push(['setTrackerUrl', u + '{{ phpTrackingPath }}']);
+        {% set matomoServer = config("JinyaMatomo.config.matomoserver") %}
+        {% set proxyTracking = config("JinyaMatomo.config.activateProxyTracking") %}
+        {% if proxyTracking %}
+            {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
+            {% set trackerJsSrc = seoUrl('frontend.matomo.proxy') %}
+        {% else %}
+            {% set trackerUrl = '//' ~ matomoServer ~ '/' ~ phpTrackingPath %}
+            {% set trackerJsSrc = '//' ~ matomoServer~ '/' ~ jsTrackingPath %}
+        {% endif %}
+
+        {% if matomoServer %}
+            window._paq.push(['setTrackerUrl', '{{ trackerUrl }}']);
             window._paq.push(['setSiteId', '{{ config("JinyaMatomo.config.matomosite") }}']);
             (function () {
                 const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
                 g.type = 'text/javascript';
                 g.async = true;
-                g.src = u + '{{ jsTrackingPath }}';
+                g.src = '{{ trackerJsSrc }}';
                 s.parentNode.insertBefore(g, s);
             })();
         {% endif %}

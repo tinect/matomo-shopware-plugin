@@ -5,32 +5,53 @@
         <title>Jinya Matomo Tracking</title>
         <input-field>
             <name>matomoserver</name>
-            <label lang="de-DE">Matomo Server</label>
-            <label lang="en-GB">Matomo Server</label>
+            <label>Matomo Server</label>
+            <helpText>The server that is running your matomo instance</helpText>
             <helpText lang="de-DE">Der Server auf dem deine Matomoinsatz läuft</helpText>
-            <helpText lang="en-GB">The server that is running your matomo instance</helpText>
             <required>true</required>
-        </input-field>
-        <input-field>
-            <name>phpTrackingPath</name>
-            <label lang="de-DE">Relativer Pfad zur matomo.php</label>
-            <label lang="en-GB">Relative path to matomo.php</label>
-            <required>true</required>
-            <defaultValue>matomo.php</defaultValue>
-        </input-field>
-        <input-field>
-            <name>jsTrackingPath</name>
-            <label lang="de-DE">Relativer Pfad zur matomo.js</label>
-            <label lang="en-GB">Relative path to matomo.js</label>
-            <required>true</required>
-            <defaultValue>matomo.js</defaultValue>
         </input-field>
         <input-field>
             <name>matomosite</name>
-            <label lang="de-DE">Matomo Site-ID</label>
-            <label lang="en-GB">Matomo Site-ID</label>
+            <label>Matomo Site-ID</label>
+            <helpText>The ID of your matomo site</helpText>
             <helpText lang="de-DE">Die ID deiner Matomosite</helpText>
-            <helpText lang="en-GB">The ID of your matomo site</helpText>
+            <required>true</required>
+        </input-field>
+    </card>
+    <card>
+        <title>Fight Adblockers</title>
+        <input-field>
+            <name>phpTrackingPath</name>
+            <label>Optional path to matomo.php (recommended)</label>
+            <label lang="de-DE">Alternativer Pfad zur matomo.php (empfohlen)</label>
+            <required>true</required>
+            <defaultValue>matomo.php</defaultValue>
+            <helpText>Because of adblockers, you should use a non-default path to the file. Add rewriteRule in your Server setting which points to matomo.php.</helpText>
+            <helpText lang="de-DE">Aufgrund von Adblockers sollten Sie einen nicht standardmäßigen Pfad zu der Datei verwenden. Fügen Sie rewriteRule in Ihrer Servereinstellung hinzu, die auf matomo.php verweist.</helpText>
+        </input-field>
+        <input-field>
+            <name>jsTrackingPath</name>
+            <label>Optional path to matomo.js (recommended)</label>
+            <label lang="de-DE">Alternativer Pfad zur matomo.js (empfohlen)</label>
+            <required>true</required>
+            <defaultValue>matomo.js</defaultValue>
+            <helpText>Because of adblockers, you should use a non-default path to the file. Add rewriteRule in your Server setting which points to matomo.js.</helpText>
+            <helpText lang="de-DE">Aufgrund von Adblockers sollten Sie einen nicht standardmäßigen Pfad zu der Datei verwenden. Fügen Sie rewriteRule in Ihrer Servereinstellung hinzu, die auf matomo.js verweist.</helpText>
+        </input-field>
+        <input-field type="bool">
+            <name>activateProxyTracking</name>
+            <label>Activate ProxyTracking</label>
+            <label lang="de-DE">Aktiviere ProxyTracking</label>
+            <required>true</required>
+            <defaultValue>0</defaultValue>
+            <helpText>When having Matomo on a different domain, adblockers could block the tracking. This options routes all trackings through the shop.</helpText>
+            <helpText lang="de-DE">Wenn Sie Matomo auf einer anderen Domain haben, könnten Adblocker das Tracking blockieren. Diese Option leitet alle Trackings durch den Shop.</helpText>
+        </input-field>
+        <input-field>
+            <name>matomoauthtoken</name>
+            <label>Matomo Auth-Token</label>
+            <helpText>The Auth-Token of a user with admin-rights. Necessary, when ProxyTracking is activated.</helpText>
+            <helpText lang="de-DE">Der Auth-Token eines Benutzers mit administrativen Rechten. Notwendig, wenn ProxyTracking aktiviert ist.</helpText>
             <required>true</required>
         </input-field>
     </card>
