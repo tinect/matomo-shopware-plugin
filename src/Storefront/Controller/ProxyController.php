@@ -66,12 +66,12 @@ class ProxyController extends StorefrontController
 
         $response->headers->set('Content-Type', 'image/webp');
         $stream_options = ['http' => [
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
-            'header' => 'Accept-Language: ' . str_replace(["\n", "\t", "\r"], '', $_SERVER['HTTP_ACCEPT_LANGUAGE']) . "\r\n",
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'header' => 'Accept-Language: ' . str_replace(["\n", "\t", "\r"], '', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '') . "\r\n",
             'timeout' => 5,
         ]];
         $ctx = stream_context_create($stream_options);
-        $response->setContent(file_get_contents($url, false, $ctx));
+        $response->setContent((string) file_get_contents($url, false, $ctx));
 
         return $response;
     }
