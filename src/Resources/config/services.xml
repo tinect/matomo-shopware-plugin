@@ -12,6 +12,7 @@
 
         <service id="JinyaMatomo\Storefront\Controller\ProxyController" public="true">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="cache.object"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

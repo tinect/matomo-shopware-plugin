@@ -2,9 +2,11 @@
 
 namespace JinyaMatomo\Storefront\Controller;
 
+use Shopware\Core\Framework\Adapter\Cache\CacheCompressor;
 use Shopware\Core\Framework\Routing\Annotation\RouteScope;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Storefront\Controller\StorefrontController;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
@@ -17,11 +19,14 @@ class ProxyController extends StorefrontController
 {
     private SystemConfigService $systemConfigService;
 
+    private AdapterInterface $cache;
+
     private int $cacheTime = 86400;
 
-    public function __construct(SystemConfigService $systemConfigService)
+    public function __construct(SystemConfigService $systemConfigService, AdapterInterface $cache)
     {
         $this->systemConfigService = $systemConfigService;
+        $this->cache = $cache;
     }
 
     /**
@@ -112,7 +117,18 @@ class ProxyController extends StorefrontController
         $response->headers->set('Content-Type', 'application/javascript; charset=UTF-8');
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, '1');
 
-        if ($matomoJs = file_get_contents($matomoServer . 'matomo.js')) {
+        $cacheItem = $this->cache->getItem('tinectmatomojs');
+
+        if ($cacheItem->isHit()) {
+            $matomoJs = CacheCompressor::uncompress($cacheItem);
+        } else {
+            $matomoJs = file_get_contents($matomoServer . 'matomo.js');
+            $cacheItem = CacheCompressor::compress($cacheItem, $matomoJs);
+            $cacheItem->expiresAfter(new \DateInterval('PT' . $this->cacheTime . 'S'));
+            $this->cache->save($cacheItem);
+        }
+
+        if ($matomoJs) {
             //$matomoJs = str_replace(['"action_name="', 'idsite='], ['"aname="', 'ids='], $matomoJs);
             $response->setContent($matomoJs);
         } else {
