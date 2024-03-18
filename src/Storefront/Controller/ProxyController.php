@@ -1,32 +1,28 @@
 <?php declare(strict_types=1);
 
-namespace JinyaMatomo\Storefront\Controller;
+namespace Tinect\Matomo\Storefront\Controller;
 
-use Shopware\Core\Framework\Adapter\Cache\CacheCompressor;
-use Shopware\Core\Framework\Routing\Annotation\RouteScope;
+use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Shopware\Storefront\Controller\StorefrontController;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Cache\CacheInterface;
 
 /**
- * @RouteScope(scopes={"storefront"})
+ * @Route(defaults={"_routeScope"={"storefront"}})
  */
 class ProxyController extends StorefrontController
 {
-    private SystemConfigService $systemConfigService;
-
-    private AdapterInterface $cache;
-
     private int $cacheTime = 86400;
 
-    public function __construct(SystemConfigService $systemConfigService, AdapterInterface $cache)
+    public function __construct(
+        private readonly SystemConfigService $systemConfigService,
+        private readonly CacheInterface $cache)
     {
-        $this->systemConfigService = $systemConfigService;
-        $this->cache = $cache;
     }
 
     /**
@@ -39,14 +35,14 @@ class ProxyController extends StorefrontController
         $response = new Response();
         $response->headers->set('x-robots-tag', 'noindex,follow');
 
-        $configs = $this->systemConfigService->get('JinyaMatomo.config');
+        $configs = $this->systemConfigService->get('TinectMatomo.config');
 
         if (!isset($configs['matomoserver'], $configs['matomoauthtoken'])) {
             $response->setStatusCode(Response::HTTP_FORBIDDEN);
             return $response;
         }
 
-        $matomoServer = 'https://' . \rtrim($configs['matomoserver'], '/') . '/';
+        $matomoServer = 'https://' . \rtrim((string) $configs['matomoserver'], '/') . '/';
         $authToken = $configs['matomoauthtoken'];
 
         $parameter = $request->query->all();
@@ -55,18 +51,9 @@ class ProxyController extends StorefrontController
         }
 
         $url = $matomoServer . 'matomo.php?cip=' . $this->getClientIp($request) . '&token_auth=' . $authToken . '&';
-        /*if (isset($parameter['aname'])) {
-            $parameter['action_name'] = $parameter['aname'];
-            unset($parameter['aname']);
-        }
-
-        if (isset($parameter['ids'])) {
-            $parameter['idsite'] = $parameter['ids'];
-            unset($parameter['ids']);
-        }*/
 
         foreach ($parameter as $key => $value) {
-            $url .= $key . '=' . urlencode($value) . '&';
+            $url .= $key . '=' . urlencode((string) $value) . '&';
         }
 
         $response->headers->set('Content-Type', 'image/webp');
@@ -117,22 +104,18 @@ class ProxyController extends StorefrontController
         $response->headers->set('Content-Type', 'application/javascript; charset=UTF-8');
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, '1');
 
-        $cacheItem = $this->cache->getItem('tinectmatomojs');
-
-        if ($cacheItem->isHit()) {
-            $matomoJs = CacheCompressor::uncompress($cacheItem);
-        } else {
-            $matomoJs = file_get_contents($matomoServer . 'matomo.js');
-            $cacheItem = CacheCompressor::compress($cacheItem, $matomoJs);
+        $cacheValue = $this->cache->get('tinectmatomojs', function (CacheItem $cacheItem) use ($matomoServer) {
             $cacheItem->expiresAfter(new \DateInterval('PT' . $this->cacheTime . 'S'));
-            $this->cache->save($cacheItem);
-        }
+            return CacheValueCompressor::compress(file_get_contents($matomoServer . 'matomo.js'));
+        });
+
+        $matomoJs = CacheValueCompressor::uncompress($cacheValue);
 
         if ($matomoJs) {
             //$matomoJs = str_replace(['"action_name="', 'idsite='], ['"aname="', 'ids='], $matomoJs);
             $response->setContent($matomoJs);
         } else {
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            $response->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         return $response;

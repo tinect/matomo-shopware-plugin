@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace JinyaMatomo;
+namespace Tinect\Matomo;
 
 use Shopware\Core\Framework\Plugin;
 
-class JinyaMatomo extends Plugin
+class TinectMatomo extends Plugin
 {
 }

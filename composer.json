@@ -1,22 +1,26 @@
 {
-  "name": "jinya/matomo-shopware-plugin",
-  "version": "1.0.6",
-  "description": "Matomo plugin for shopware 6",
-  "type": "shopware-platform-plugin",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "JinyaMatomo\\": "src/"
+    "name": "tinect/matomo",
+    "version": "2.0.0",
+    "description": "Matomo plugin for shopware 6",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tinect\\Matomo\\": "src/"
+        }
+    },
+    "require": {
+        "php": "~8.1||~8.2||~8.3",
+        "shopware/core": "~6.4.11"
+    },
+    "conflict": {
+        "jinya/matomo-shopware-plugin": "*"
+    },
+    "extra": {
+        "shopware-plugin-class": "Tinect\\Matomo\\TinectMatomo",
+        "label": {
+            "de-DE": "Matomo Tracking",
+            "en-GB": "Matomo Tracking"
+        }
     }
-  },
-  "require": {
-    "shopware/core": "~6.4.0"
-  },
-  "extra": {
-    "shopware-plugin-class": "JinyaMatomo\\JinyaMatomo",
-    "label": {
-      "de-DE": "Matomo Tracking",
-      "en-GB": "Matomo Tracking"
-    }
-  }
 }

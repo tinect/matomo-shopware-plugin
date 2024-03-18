@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace JinyaMatomo\Service;
+namespace Tinect\Matomo\Service;
 
 use Shopware\Storefront\Framework\Cookie\CookieProviderInterface;
 
@@ -20,11 +20,8 @@ class CustomCookieProvider implements CookieProviderInterface
         ],
     ];
 
-    private CookieProviderInterface $originalService;
-
-    public function __construct(CookieProviderInterface $service)
+    public function __construct(private readonly CookieProviderInterface $originalService)
     {
-        $this->originalService = $service;
     }
 
     public function getCookieGroups(): array
