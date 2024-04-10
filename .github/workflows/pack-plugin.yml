@@ -9,6 +9,6 @@ jobs:
         uses: FriendsOfShopware/actions/.github/workflows/github.yml@main
         with:
             extensionName: TinectMatomo
-            shopwareVersion: 6.5.0
+            shopwareVersion: 6.6.0
         secrets:
             ghToken: ${{ secrets.GITHUB_TOKEN }}
