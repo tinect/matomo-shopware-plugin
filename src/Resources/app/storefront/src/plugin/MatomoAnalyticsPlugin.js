@@ -1,21 +1,11 @@
-import Plugin from "src/plugin-system/plugin.class";
-import CookieStorageHelper from "src/helper/storage/cookie-storage.helper";
-import {COOKIE_CONFIGURATION_UPDATE} from "src/plugin/cookie/cookie-configuration.plugin";
-
-export default class MatomoAnalyticsPlugin extends Plugin {
+export default class MatomoAnalyticsPlugin extends window.PluginBaseClass {
     init() {
         this.cookieEnabledName = 'matomo-analytics-enabled';
-        window.matomoCookieActive = Boolean(CookieStorageHelper.getItem(this.cookieEnabledName));
+        window.matomoCookieActive = Boolean(this.getCookieItem(this.cookieEnabledName));
 
-        this.startMatomoAnalytics();
-    }
+        document.$emitter.subscribe('CookieConfiguration_Update', this.handleCookies.bind(this));
 
-    startMatomoAnalytics() {
         window.mTrackCall();
-    }
-
-    handleCookieChangeEvent() {
-        document.$emitter.subscribe(COOKIE_CONFIGURATION_UPDATE, this.handleCookies.bind(this));
     }
 
     handleCookies(cookieUpdateEvent) {
@@ -33,10 +23,6 @@ export default class MatomoAnalyticsPlugin extends Plugin {
     }
 
     removeCookies() {
-        if (!CookieStorageHelper.isSupported()) {
-            return;
-        }
-
         const allCookies = document.cookie.split(';');
         const gaCookieRegex = /^(_pk)/;
 
@@ -46,7 +32,30 @@ export default class MatomoAnalyticsPlugin extends Plugin {
                 return;
             }
 
-            CookieStorageHelper.removeItem(cookieName);
+            document.cookie = `${cookieName}= ; expires = Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
         });
+    }
+
+    getCookieItem(key) {
+        if (!key) {
+            return false;
+        }
+
+        const name = key + '=';
+        const allCookies = document.cookie.split(';');
+
+        for (let i = 0; i < allCookies.length; i++) {
+            let singleCookie = allCookies[i];
+
+            while (singleCookie.charAt(0) === ' ') {
+                singleCookie = singleCookie.substring(1);
+            }
+
+            if (singleCookie.indexOf(name) === 0) {
+                return singleCookie.substring(name.length, singleCookie.length);
+            }
+        }
+
+        return false;
     }
 }
