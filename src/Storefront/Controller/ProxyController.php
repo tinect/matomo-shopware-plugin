@@ -26,7 +26,7 @@ class ProxyController extends StorefrontController
     /**
      * Inspired by https://arnowelzel.de/samples/piwik-tracker-proxy.txt
      */
-    #[Route(path: '/mtmtrpr/', name: 'frontend.matomo.proxy', defaults: ['XmlHttpRequest' => true], methods: ['GET','POST'])]
+    #[Route(path: '/mtmtrpr', name: 'frontend.matomo.proxy', defaults: ['XmlHttpRequest' => true], methods: ['GET','POST'])]
     public function matomoProxy(Request $request): Response
     {
         $response = new Response();
