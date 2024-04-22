@@ -9,3 +9,11 @@ The plugin is based as fork from [Jinya-CMS/matomo-shopware-plugin](https://gith
 * Track page views
 * Track product views
 * Track orders
+
+
+## Installation
+
+```
+composer require tinect/matomo
+```
+Then install and activate it within shopware
