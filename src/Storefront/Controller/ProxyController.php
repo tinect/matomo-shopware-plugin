@@ -9,12 +9,10 @@ use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 
-/**
- * @Route(defaults={"_routeScope"={"storefront"}})
- */
+#[Route(defaults: ['_routeScope' => ['storefront']])]
 class ProxyController extends StorefrontController
 {
     private int $cacheTime = 86400;
@@ -27,9 +25,8 @@ class ProxyController extends StorefrontController
 
     /**
      * Inspired by https://arnowelzel.de/samples/piwik-tracker-proxy.txt
-     *
-     * @Route("/mtmtrpr/", name="frontend.matomo.proxy", methods={"GET","POST"}, defaults={"XmlHttpRequest"=true,"csrf_protected"=false})
      */
+    #[Route(path: '/mtmtrpr/', name: 'frontend.matomo.proxy', defaults: ['XmlHttpRequest' => true], methods: ['GET','POST'])]
     public function matomoProxy(Request $request): Response
     {
         $response = new Response();
