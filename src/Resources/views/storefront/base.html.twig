@@ -13,7 +13,22 @@
             ]);
         {% endif %}
 
-        {% if page.order is defined %}
+        {% if page.cart is defined %}
+            {% for item in page.cart.lineItems.elements %}
+                window._paq.push([
+                    'addEcommerceItem',
+                    '{{ item.payload["productNumber"] }}',
+                    '{{ item.label }}',
+                    '',
+                    {{ item.price.unitPrice }},
+                    '{{ item.quantity }}',
+                ]);
+            {% endfor %}
+            window._paq.push([
+                'trackEcommerceCartUpdate',
+                {{ page.cart.price.totalPrice }}
+            ]);
+        {% elseif page.order is defined %}
             {% for item in page.order.lineItems.elements %}
                 window._paq.push([
                     'addEcommerceItem',
