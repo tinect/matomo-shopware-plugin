@@ -28,9 +28,13 @@ class CustomCookieProvider implements CookieProviderInterface
     {
         $cookieGroups = $this->originalService->getCookieGroups();
 
-        foreach ($cookieGroups as $key => $group) {
+        foreach ($cookieGroups as &$group) {
+            if (!\is_array($group) || !isset($group['snippet_name'])) {
+                continue;
+            }
+
             if ($group['snippet_name'] === self::cookieGroup['snippet_name']) {
-                $cookieGroups[$key]['entries'] = array_merge(
+                $group['entries'] = array_merge(
                     $group['entries'],
                     self::cookieGroup['entries']
                 );

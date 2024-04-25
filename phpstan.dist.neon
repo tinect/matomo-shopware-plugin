@@ -1,0 +1,19 @@
+includes:
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+    checkGenericClassInNonGenericObjectType: false
+
+    excludePaths:
+        - ecs.php
+        - vendor
+        - **/tests/**
+
+    ignoreErrors:
+        -
+            message: """
+                #no value type specified in iterable type array#
+            """
