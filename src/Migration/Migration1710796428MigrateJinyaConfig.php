@@ -18,7 +18,7 @@ class Migration1710796428MigrateJinyaConfig extends MigrationStep
     {
         $existingConfig = $connection->fetchAllAssociative('SELECT * FROM system_config WHERE configuration_key LIKE "JinyaMatomo.config.%"');
 
-        if (count($existingConfig) === 0) {
+        if (\count($existingConfig) === 0) {
             return;
         }
 

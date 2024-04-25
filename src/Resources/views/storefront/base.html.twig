@@ -6,7 +6,7 @@
 
         window._paq.push(['enableHeartBeatTimer']);
 
-        {% if activeRoute == "frontend.detail.page" %}
+        {% if activeRoute == 'frontend.detail.page' %}
             window._paq.push([
                 'setEcommerceView',
                 '{{ page.product.productNumber|escape('js') }}',
@@ -19,7 +19,7 @@
             {% for item in page.cart.lineItems.elements %}
                 window._paq.push([
                     'addEcommerceItem',
-                    '{{ item.payload["productNumber"] }}',
+                    '{{ item.payload['productNumber'] }}',
                     '{{ item.label }}',
                     '',
                     {{ item.price.unitPrice }},
@@ -34,7 +34,7 @@
             {% for item in page.order.lineItems.elements %}
                 window._paq.push([
                     'addEcommerceItem',
-                    '{{ item.payload["productNumber"] }}',
+                    '{{ item.payload['productNumber'] }}',
                     '{{ item.label }}',
                     '',
                     {{ item.unitPrice }},
@@ -52,37 +52,37 @@
             ]);
         {% endif %}
 
-        {% set phpTrackingPath = config("TinectMatomo.config.phpTrackingPath") %}
+        {% set phpTrackingPath = config('TinectMatomo.config.phpTrackingPath') %}
         {% if phpTrackingPath is empty %}
             {% set phpTrackingPath = 'matomo.php' %}
         {% endif %}
 
-        {% set jsTrackingPath = config("TinectMatomo.config.jsTrackingPath") %}
+        {% set jsTrackingPath = config('TinectMatomo.config.jsTrackingPath') %}
         {% if jsTrackingPath is empty %}
             {% set jsTrackingPath = 'matomo.js' %}
         {% endif %}
 
         window.mTrackCall = function() {
             if (!window.matomoCookieActive) {
-                window._paq.push(["disableCookies"]);
+                window._paq.push(['disableCookies']);
             }
             window._paq.push(['trackPageView']);
             window._paq.push(['enableLinkTracking']);
         }
 
-        {% set matomoServer = config("TinectMatomo.config.matomoserver") %}
-        {% set proxyTracking = config("TinectMatomo.config.activateProxyTracking") %}
-        {% if proxyTracking %}
-            {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
-            {% set trackerJsSrc = seoUrl('frontend.matomo.proxy') %}
-        {% else %}
-            {% set trackerUrl = '//' ~ matomoServer ~ '/' ~ phpTrackingPath %}
-            {% set trackerJsSrc = '//' ~ matomoServer~ '/' ~ jsTrackingPath %}
-        {% endif %}
+        {% set matomoServer = config('TinectMatomo.config.matomoserver') %}
 
         {% if matomoServer %}
+            {% if config('TinectMatomo.config.activateProxyTracking') %}
+                {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
+                {% set trackerJsSrc = seoUrl('frontend.matomo.proxy') %}
+            {% else %}
+                {% set trackerUrl = matomoServer ~ '/' ~ phpTrackingPath %}
+                {% set trackerJsSrc = matomoServer ~ '/' ~ jsTrackingPath %}
+            {% endif %}
+
             window._paq.push(['setTrackerUrl', '{{ trackerUrl }}']);
-            window._paq.push(['setSiteId', '{{ config("TinectMatomo.config.matomosite") }}']);
+            window._paq.push(['setSiteId', '{{ config('TinectMatomo.config.matomosite') }}']);
             (function () {
                 const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
                 g.type = 'text/javascript';

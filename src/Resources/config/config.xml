@@ -3,7 +3,7 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
     <card>
         <title>Tinect Matomo Tracking</title>
-        <input-field>
+        <input-field type="url">
             <name>matomoserver</name>
             <label>Matomo Server</label>
             <helpText>The server that is running your matomo instance</helpText>

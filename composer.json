@@ -1,25 +1,39 @@
 {
-  "name": "tinect/matomo",
-  "version": "4.2.0",
-  "description": "Matomo plugin for shopware 6",
-  "type": "shopware-platform-plugin",
-  "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Tinect\\Matomo\\": "src/"
+    "name": "tinect/matomo",
+    "version": "4.2.0",
+    "description": "Matomo plugin for shopware 6",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Tinect\\Matomo\\": "src/"
+        }
+    },
+    "require": {
+        "shopware/core": "~6.6.0",
+        "shopware/storefront": "*"
+    },
+    "require-dev": {
+        "phpstan/phpstan-deprecation-rules": "^1.1"
+    },
+    "conflict": {
+        "jinya/matomo-shopware-plugin": "*"
+    },
+    "extra": {
+        "shopware-plugin-class": "Tinect\\Matomo\\TinectMatomo",
+        "label": {
+            "de-DE": "Matomo Tracking",
+            "en-GB": "Matomo Tracking"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "symfony/runtime": true
+        }
+    },
+    "scripts": {
+        "phpstan": [
+            "vendor/bin/phpstan analyze $1"
+        ]
     }
-  },
-  "require": {
-    "shopware/core": "~6.6.0"
-  },
-  "conflict": {
-    "jinya/matomo-shopware-plugin": "*"
-  },
-  "extra": {
-    "shopware-plugin-class": "Tinect\\Matomo\\TinectMatomo",
-    "label": {
-      "de-DE": "Matomo Tracking",
-      "en-GB": "Matomo Tracking"
-    }
-  }
 }
