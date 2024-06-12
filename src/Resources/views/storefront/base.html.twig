@@ -50,6 +50,12 @@
                 {{ page.order.shippingTotal }},
                 false
             ]);
+        {% elseif activeRoute is same as('frontend.search.page') %}
+            window._paq.push(['trackSiteSearch',
+                '{{ page.searchTerm|escape('js') }}',
+                'searchPage',
+                {{ page.listing.total }}
+            ]);
         {% endif %}
 
         {% set phpTrackingPath = config('TinectMatomo.config.phpTrackingPath') %}
@@ -66,7 +72,9 @@
             if (!window.matomoCookieActive) {
                 window._paq.push(['disableCookies']);
             }
-            window._paq.push(['trackPageView']);
+            {% if activeRoute is not same as('frontend.search.page') %}
+                window._paq.push(['trackPageView']);
+            {% endif %}
             window._paq.push(['enableLinkTracking']);
         }
 
