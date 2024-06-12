@@ -1,0 +1,11 @@
+{% sw_extends "@Storefront/storefront/layout/header/search-suggest.html.twig" %}
+
+{% block layout_search_suggest_result_total %}
+    {{ parent() }}
+
+    {% set matomoHelperData = {
+        term: page.searchTerm,
+        count: page.searchResult.total
+    } %}
+    <div class="matomo-search-suggest-helper" data-value="{{ matomoHelperData|json_encode }}"></div>
+{% endblock %}
