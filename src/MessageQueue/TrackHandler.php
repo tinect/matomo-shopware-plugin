@@ -2,6 +2,7 @@
 
 namespace Tinect\Matomo\MessageQueue;
 
+use GuzzleHttp\Client;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Tinect\Matomo\Service\StaticHelper;
@@ -28,7 +29,9 @@ class TrackHandler
             return;
         }
 
-        $matomoUrl .= 'matomo.php?';
+        $matomoUrl .= 'matomo.php';
+
+        $client = new Client();
 
         $parameter = $message->parameters;
         $parameter['cdt'] = $message->unixTimestamp;
@@ -38,17 +41,13 @@ class TrackHandler
             $parameter['cip'] = $message->clientIp;
         }
 
-        foreach ($parameter as $key => $value) {
-            $matomoUrl .= $key . '=' . urlencode((string) $value) . '&';
-        }
-
-        $stream_options = ['http' => [
-            'user_agent' => $message->userAgent,
-            'header' => 'Accept-Language: ' . str_replace(["\n", "\t", "\r"], '', $message->acceptLanguage) . "\r\n",
+        $client->post($matomoUrl, [
+            'form_params' => $parameter,
+            'headers' => [
+                'User-Agent' => $message->userAgent,
+                'Accept-Language' => str_replace(["\n", "\t", "\r"], '', $message->acceptLanguage),
+            ],
             'timeout' => 5,
-        ]];
-        $ctx = stream_context_create($stream_options);
-
-        file_get_contents($matomoUrl, false, $ctx);
+        ]);
     }
 }
