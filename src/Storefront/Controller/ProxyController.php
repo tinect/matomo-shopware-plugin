@@ -4,7 +4,7 @@ namespace Tinect\Matomo\Storefront\Controller;
 
 use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
-use Shopware\Storefront\Controller\StorefrontController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
@@ -16,7 +16,7 @@ use Tinect\Matomo\MessageQueue\TrackMessage;
 use Tinect\Matomo\Service\StaticHelper;
 
 #[Route(defaults: ['_routeScope' => ['storefront']])]
-class ProxyController extends StorefrontController
+class ProxyController extends AbstractController
 {
     private int $cacheTime = 86400;
 
