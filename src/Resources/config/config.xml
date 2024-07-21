@@ -19,7 +19,7 @@
         </input-field>
     </card>
     <card>
-        <title>Fight Adblockers</title>
+        <title>Fight Adblockers and Server-Side tracking</title>
         <input-field>
             <name>phpTrackingPath</name>
             <label>Optional path to matomo.php (recommended)</label>
@@ -40,8 +40,8 @@
         </input-field>
         <input-field type="bool">
             <name>activateProxyTracking</name>
-            <label>Activate ProxyTracking</label>
-            <label lang="de-DE">Aktiviere ProxyTracking</label>
+            <label>Activate ProxyTracking/Server-Side tracking</label>
+            <label lang="de-DE">Aktiviere ProxyTracking/Serverside Tracking</label>
             <required>true</required>
             <defaultValue>0</defaultValue>
             <helpText>When having Matomo on a different domain, adblockers could block the tracking. This options routes all trackings through the shop.</helpText>
