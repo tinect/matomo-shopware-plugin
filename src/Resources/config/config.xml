@@ -42,7 +42,6 @@
             <name>activateProxyTracking</name>
             <label>Activate ProxyTracking/Server-Side tracking</label>
             <label lang="de-DE">Aktiviere ProxyTracking/Serverside Tracking</label>
-            <required>true</required>
             <defaultValue>0</defaultValue>
             <helpText>When having Matomo on a different domain, adblockers could block the tracking. This options routes all trackings through the shop.</helpText>
             <helpText lang="de-DE">Wenn Sie Matomo auf einer anderen Domain haben, könnten Adblocker das Tracking blockieren. Diese Option leitet alle Trackings durch den Shop.</helpText>
@@ -52,7 +51,6 @@
             <label>Matomo Auth-Token</label>
             <helpText>The Auth-Token of a user with admin-rights. Necessary, when ProxyTracking is activated.</helpText>
             <helpText lang="de-DE">Der Auth-Token eines Benutzers mit administrativen Rechten. Notwendig, wenn ProxyTracking aktiviert ist.</helpText>
-            <required>true</required>
         </input-field>
     </card>
 </config>

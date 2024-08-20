@@ -50,7 +50,7 @@ class ProxyController extends AbstractController
         }
 
         $this->messageBus->dispatch(new TrackMessage(
-            $this->getClientIp($request),
+            $request->getClientIp(),
             $request->server->getString('HTTP_USER_AGENT'),
             $request->server->getString('HTTP_ACCEPT_LANGUAGE'),
             time(),
@@ -58,21 +58,6 @@ class ProxyController extends AbstractController
         ));
 
         return $response;
-    }
-
-    private function getClientIp(Request $request): ?string
-    {
-        $clientIp = $request->server->getString('HTTP_X_FORWARDED_FOR');
-
-        if ($clientIp === '') {
-            $clientIp = $request->getClientIp();
-        }
-
-        if (\is_string($clientIp)) {
-            return $clientIp;
-        }
-
-        return null;
     }
 
     private function requestJs(Response $response, string $matomoServer): Response
