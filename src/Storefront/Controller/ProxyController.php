@@ -67,13 +67,15 @@ class ProxyController extends AbstractController
             $modifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
             // strip any trailing data appended to header
             if (false !== ($semicolon = strpos($modifiedSince, ';'))) {
-                $modifiedSince = strtotime(substr($modifiedSince, 0, $semicolon));
+                $modifiedSince = substr($modifiedSince, 0, $semicolon);
             }
+
+            $modifiedSince = strtotime($modifiedSince);
         }
 
         $response->headers->set('Vary', 'Accept-Encoding');
 
-        if ($modifiedSince && $modifiedSince < (time() - $this->cacheTime)) {
+        if ($modifiedSince && $modifiedSince > (time() - $this->cacheTime)) {
             $response->setStatusCode(Response::HTTP_NOT_MODIFIED);
 
             return $response;
