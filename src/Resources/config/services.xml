@@ -14,6 +14,7 @@
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="cache.object"/>
             <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="event_dispatcher" />
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>

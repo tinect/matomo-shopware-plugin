@@ -5,6 +5,7 @@ namespace Tinect\Matomo\Storefront\Controller;
 use Shopware\Core\Framework\Adapter\Cache\CacheValueCompressor;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\EventListener\AbstractSessionListener;
@@ -12,6 +13,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use Tinect\Matomo\MessageQueue\Event\CreateTrackMessageEvent;
 use Tinect\Matomo\MessageQueue\TrackMessage;
 use Tinect\Matomo\Service\StaticHelper;
 
@@ -23,7 +25,8 @@ class ProxyController extends AbstractController
     public function __construct(
         private readonly SystemConfigService $systemConfigService,
         private readonly CacheInterface $cache,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
 
@@ -49,13 +52,17 @@ class ProxyController extends AbstractController
             return $this->requestJs($response, $matomoServer);
         }
 
-        $this->messageBus->dispatch(new TrackMessage(
+        $message = new TrackMessage(
             $request->getClientIp(),
             $request->server->getString('HTTP_USER_AGENT'),
             $request->server->getString('HTTP_ACCEPT_LANGUAGE'),
             time(),
             $parameter
-        ));
+        );
+
+        $this->eventDispatcher->dispatch(new CreateTrackMessageEvent($message, $request, $response));
+
+        $this->messageBus->dispatch($message);
 
         return $response;
     }
