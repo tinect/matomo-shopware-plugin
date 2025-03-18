@@ -44,8 +44,16 @@ class ProxyController extends AbstractController
             return $response;
         }
 
-        $parameter = $request->query->all();
-        if (empty($parameter)) {
+        $parameters = $request->query->all();
+
+        if (empty($parameters)) {
+            $givenContent = $request->getContent();;
+            if (\is_string($givenContent)) {
+                $parameters = $givenContent;
+            }
+        }
+
+        if (empty($parameters)) {
             return $this->requestJs($response, $matomoServer);
         }
 
@@ -54,7 +62,7 @@ class ProxyController extends AbstractController
             $request->server->getString('HTTP_USER_AGENT'),
             $request->server->getString('HTTP_ACCEPT_LANGUAGE'),
             time(),
-            $parameter
+            $parameters
         ));
 
         return $response;

@@ -11,7 +11,7 @@ class TrackMessage implements LowPriorityMessageInterface
         public readonly string $userAgent,
         public readonly string $acceptLanguage,
         public readonly int $unixTimestamp,
-        public readonly array $parameters,
+        public readonly string|array $parameters,
     ) {
     }
 }
