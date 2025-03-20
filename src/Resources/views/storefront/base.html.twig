@@ -1,6 +1,8 @@
 {% sw_extends "@Storefront/storefront/base.html.twig" %}
+
 {% block base_body %}
     {{ parent() }}
+
     <script>
         window._paq = window._paq || [];
 
@@ -58,16 +60,6 @@
             ]);
         {% endif %}
 
-        {% set phpTrackingPath = config('TinectMatomo.config.phpTrackingPath') %}
-        {% if phpTrackingPath is empty %}
-            {% set phpTrackingPath = 'matomo.php' %}
-        {% endif %}
-
-        {% set jsTrackingPath = config('TinectMatomo.config.jsTrackingPath') %}
-        {% if jsTrackingPath is empty %}
-            {% set jsTrackingPath = 'matomo.js' %}
-        {% endif %}
-
         window.mTrackCall = function() {
             if (!window.matomoCookieActive) {
                 window._paq.push(['disableCookies']);
@@ -79,14 +71,13 @@
         }
 
         {% set matomoServer = config('TinectMatomo.config.matomoserver') %}
-
         {% if matomoServer %}
             {% if config('TinectMatomo.config.activateProxyTracking') %}
                 {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
                 {% set trackerJsSrc = seoUrl('frontend.matomo.proxy') %}
             {% else %}
-                {% set trackerUrl = matomoServer ~ '/' ~ phpTrackingPath %}
-                {% set trackerJsSrc = matomoServer ~ '/' ~ jsTrackingPath %}
+                {% set trackerUrl = matomoServer ~ '/' ~ (config('TinectMatomo.config.phpTrackingPath') ?: 'matomo.php') %}
+                {% set trackerJsSrc = matomoServer ~ '/' ~ (config('TinectMatomo.config.jsTrackingPath') ?: 'matomo.js') %}
             {% endif %}
 
             window._paq.push(['setTrackerUrl', '{{ trackerUrl }}']);
