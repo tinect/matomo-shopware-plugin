@@ -10,7 +10,7 @@
         }
     },
     "require": {
-        "shopware/core": "~6.6.0",
+        "shopware/core": "~6.6.10||~6.7.0",
         "shopware/storefront": "*"
     },
     "require-dev": {

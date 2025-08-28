@@ -13,7 +13,7 @@
         <service id="Tinect\Matomo\Storefront\Controller\ProxyController" public="true">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <argument type="service" id="cache.object"/>
-            <argument type="service" id="messenger.bus.shopware"/>
+            <argument type="service" id="messenger.default_bus"/>
             <call method="setContainer">
                 <argument type="service" id="service_container"/>
             </call>
