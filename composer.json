@@ -1,6 +1,6 @@
 {
     "name": "tinect/matomo",
-    "version": "4.5.0",
+    "version": "5.0.0",
     "description": "Matomo plugin for shopware 6",
     "type": "shopware-platform-plugin",
     "license": "MIT",
@@ -10,7 +10,7 @@
         }
     },
     "require": {
-        "shopware/core": "~6.6.0",
+        "shopware/core": "~6.7.0",
         "shopware/storefront": "*"
     },
     "require-dev": {

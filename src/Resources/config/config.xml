@@ -17,6 +17,14 @@
             <helpText lang="de-DE">Die ID deiner Matomosite</helpText>
             <required>true</required>
         </input-field>
+        <input-field type="bool">
+            <name>enableLogger</name>
+            <label>Enable Matomo Logger</label>
+            <label lang="de-DE">Matomo-Logger aktivieren</label>
+            <defaultValue>0</defaultValue>
+            <helpText>Write detailed Matomo tracking requests/responses to a dedicated log file. Disable in production unless needed.</helpText>
+            <helpText lang="de-DE">Schreibt detaillierte Matomo Tracking-Anfragen/Antworten in eine eigene Logdatei. In Produktion nur bei Bedarf aktivieren.</helpText>
+        </input-field>
     </card>
     <card>
         <title>Fight Adblockers and Server-Side tracking</title>
