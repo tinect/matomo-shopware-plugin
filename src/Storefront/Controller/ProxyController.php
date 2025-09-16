@@ -37,8 +37,9 @@ class ProxyController extends AbstractController
         $response->headers->set('x-robots-tag', 'noindex,follow');
 
         $matomoServer = StaticHelper::getMatomoUrl($this->systemConfigService);
+        $matomoJsUrl = StaticHelper::getMatomoJsEndpoint($this->systemConfigService);
 
-        if ($matomoServer === null) {
+        if ($matomoServer === null || $matomoJsUrl === null) {
             $response->setStatusCode(Response::HTTP_FORBIDDEN);
 
             return $response;
@@ -54,7 +55,7 @@ class ProxyController extends AbstractController
         }
 
         if (empty($parameters)) {
-            return $this->requestJs($response, $matomoServer);
+            return $this->requestJs($response, $matomoJsUrl);
         }
 
         $this->messageBus->dispatch(new TrackMessage(
@@ -68,7 +69,7 @@ class ProxyController extends AbstractController
         return $response;
     }
 
-    private function requestJs(Response $response, string $matomoServer): Response
+    private function requestJs(Response $response, string $matomoJsUrl): Response
     {
         $modifiedSince = 0;
         if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
@@ -96,10 +97,10 @@ class ProxyController extends AbstractController
         $response->headers->set('Content-Type', 'application/javascript; charset=UTF-8');
         $response->headers->set(AbstractSessionListener::NO_AUTO_CACHE_CONTROL_HEADER, '1');
 
-        $cacheValue = $this->cache->get('tinectmatomojs', function (ItemInterface $cacheItem) use ($matomoServer) {
+        $cacheValue = $this->cache->get('tinectmatomojs', function (ItemInterface $cacheItem) use ($matomoJsUrl) {
             $cacheItem->expiresAfter(new \DateInterval('PT' . $this->cacheTime . 'S'));
 
-            return CacheValueCompressor::compress(file_get_contents($matomoServer . 'matomo.js'));
+            return CacheValueCompressor::compress(file_get_contents($matomoJsUrl));
         });
 
         $matomoJs = CacheValueCompressor::uncompress($cacheValue);

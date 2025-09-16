@@ -3,15 +3,19 @@
 namespace Tinect\Matomo\MessageQueue;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Tinect\Matomo\Service\StaticHelper;
 
 #[AsMessageHandler]
 class TrackHandler
 {
     public function __construct(
-        private readonly SystemConfigService $systemConfigService
+        private readonly SystemConfigService $systemConfigService,
+        private readonly ?LoggerInterface $logger = null
     ) {
     }
 
@@ -20,52 +24,120 @@ class TrackHandler
         $authToken = $this->systemConfigService->getString('TinectMatomo.config.matomoauthtoken');
 
         if ($authToken === '') {
+            if ($this->logger && $this->isLoggingEnabled()) {
+                $this->logger->error('No auth token configured for Matomo tracking.');
+            }
             return;
         }
 
-        $matomoUrl = StaticHelper::getMatomoUrl($this->systemConfigService);
+        $matomoUrl = StaticHelper::getMatomoPhpEndpoint($this->systemConfigService);
 
         if ($matomoUrl === null) {
+            if ($this->logger && $this->isLoggingEnabled()) {
+                $this->logger->error('No matomo url configured for Matomo tracking.');
+            }
             return;
         }
 
-        $queryParameters = [];
-        $queryParameters['cdt'] = $message->unixTimestamp;
-        $queryParameters['token_auth'] = $authToken;
+        // Build parameters that must accompany every request
+        $commonParameters = [];
+        // Matomo Tracking API version: required by API
+        $commonParameters['apiv'] = 1;
+        $commonParameters['cdt'] = $message->unixTimestamp;
+        $commonParameters['token_auth'] = $authToken;
 
         if (!empty($message->clientIp) && $message->clientIp !== '::1') {
-            $queryParameters['cip'] = $message->clientIp;
+            $commonParameters['cip'] = $message->clientIp;
         }
-
-        $matomoUrl .= 'matomo.php';
 
         $parameter = $message->parameters;
 
         if (\is_string($parameter)) {
+            // Bulk tracking payload: enrich each request; do NOT also put params on URL
             try {
-                $parameter = $this->enrichRequests($parameter, $queryParameters);
+                $parameter = $this->enrichRequests($parameter, $commonParameters);
             } catch (\JsonException) {
+                if ($this->logger && $this->isLoggingEnabled()) {
+                    $this->logger->error('No matomo url configured for Matomo tracking.');
+                }
             }
 
             $data = [
                 'body' => $parameter,
             ];
         } else {
+            // Normal tracking: merge common parameters into form params and drop empty-string values
+            if (!\is_array($parameter)) {
+                $parameter = [];
+            }
+
+            $merged = array_merge($parameter, $commonParameters);
+            // Remove empty-string values to avoid invalid parameters like _id=""
+            $merged = array_filter($merged, static function ($v) {
+                return $v !== '' && $v !== null;
+            });
+
             $data = [
-                'form_params' => $parameter,
+                'form_params' => $merged,
             ];
         }
 
         $client = new Client();
 
-        $client->post($matomoUrl . '?' . \http_build_query($queryParameters), [
-            ...$data,
-            'headers' => [
-                'User-Agent' => $message->userAgent,
-                'Accept-Language' => str_replace(["\n", "\t", "\r"], '', $message->acceptLanguage),
-            ],
-            'timeout' => 10,
-        ]);
+        // Build headers and set JSON content type when sending bulk payload
+        $headers = [
+            'User-Agent' => $message->userAgent,
+            'Accept-Language' => str_replace(["\n", "\t", "\r"], '', $message->acceptLanguage),
+        ];
+        if (isset($data['body'])) {
+            $headers['Content-Type'] = 'application/json';
+        }
+
+        // Post directly to matomo.php without query string; params are in body
+        try {
+            $response = $client->post($matomoUrl, [
+                ...$data,
+                'headers' => $headers,
+                'timeout' => 10,
+                'http_errors' => false, // allow logging for all HTTP statuses
+            ]);
+
+            $status = $response->getStatusCode();
+            $body = (string) $response->getBody();
+            // sanitize data before logging (redact token_auth)
+            $safeData = $this->sanitizeDataForLog($data);
+            if ($this->logger && $this->isLoggingEnabled()) {
+                $this->logger->info('Matomo tracking response', [
+                    'status' => $status,
+                    'responseBody' => mb_substr($body, 0, 500),
+                    'endpoint' => $matomoUrl,
+                    'payload' => $safeData,
+                ]);
+            }
+
+            if ($status >= 200 && $status < 300) {
+                return; // success
+            }
+
+            // treat 4xx as unrecoverable to avoid endless retries
+            if ($status >= 400 && $status < 500) {
+                throw new UnrecoverableMessageHandlingException('Matomo returned HTTP ' . $status . ' for tracking payload');
+            }
+
+            // For 5xx and other unexpected statuses, throw to let worker retry
+            throw new \RuntimeException('Matomo returned HTTP ' . $status . ' for tracking payload');
+        } catch (\Throwable $e) {
+            $safeData = $this->sanitizeDataForLog($data);
+            if ($this->logger && $this->isLoggingEnabled()) {
+                $this->logger->error('Matomo tracking request error (transport/other)', [
+                    'exception' => $e::class,
+                    'message' => $e->getMessage(),
+                    'endpoint' => $matomoUrl,
+                    'payload' => $safeData,
+                ]);
+            }
+            throw $e; // let worker handle retries for transient issues
+        }
     }
 
     private function enrichRequests(string $parameter, array $queryParameters): string
@@ -87,5 +159,25 @@ class TrackHandler
         }
 
         return '';
+    }
+
+    private function isLoggingEnabled(): bool
+    {
+        return $this->systemConfigService->getBool('TinectMatomo.config.enableLogger');
+    }
+
+    private function sanitizeDataForLog(array $data): array
+    {
+        $copy = $data;
+        if (isset($copy['form_params']) && is_array($copy['form_params'])) {
+            if (array_key_exists('token_auth', $copy['form_params'])) {
+                $copy['form_params']['token_auth'] = '***redacted***';
+            }
+        }
+        if (isset($copy['body']) && is_string($copy['body'])) {
+            // mask token_auth values inside bulk body
+            $copy['body'] = preg_replace('/token_auth=[^&"]+/i', 'token_auth=***redacted***', $copy['body']);
+        }
+        return $copy;
     }
 }
