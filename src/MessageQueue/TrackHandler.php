@@ -4,18 +4,18 @@ namespace Tinect\Matomo\MessageQueue;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use Psr\Log\LoggerInterface;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Tinect\Matomo\Service\StaticHelper;
+use Tinect\Matomo\Service\ConditionalLogger;
 
 #[AsMessageHandler]
 class TrackHandler
 {
     public function __construct(
         private readonly SystemConfigService $systemConfigService,
-        private readonly ?LoggerInterface $logger = null
+        private readonly ConditionalLogger $logger
     ) {
     }
 
@@ -24,18 +24,14 @@ class TrackHandler
         $authToken = $this->systemConfigService->getString('TinectMatomo.config.matomoauthtoken');
 
         if ($authToken === '') {
-            if ($this->logger && $this->isLoggingEnabled()) {
-                $this->logger->error('No auth token configured for Matomo tracking.');
-            }
+            $this->logger->error('No auth token configured for Matomo tracking.');
             return;
         }
 
         $matomoUrl = StaticHelper::getMatomoPhpEndpoint($this->systemConfigService);
 
         if ($matomoUrl === null) {
-            if ($this->logger && $this->isLoggingEnabled()) {
-                $this->logger->error('No matomo url configured for Matomo tracking.');
-            }
+            $this->logger->error('No matomo url configured for Matomo tracking.');
             return;
         }
 
@@ -57,9 +53,7 @@ class TrackHandler
             try {
                 $parameter = $this->enrichRequests($parameter, $commonParameters);
             } catch (\JsonException) {
-                if ($this->logger && $this->isLoggingEnabled()) {
-                    $this->logger->error('No matomo url configured for Matomo tracking.');
-                }
+                $this->logger->error('No matomo url configured for Matomo tracking.');
             }
 
             $data = [
@@ -106,14 +100,12 @@ class TrackHandler
             $body = (string) $response->getBody();
             // sanitize data before logging (redact token_auth)
             $safeData = $this->sanitizeDataForLog($data);
-            if ($this->logger && $this->isLoggingEnabled()) {
-                $this->logger->info('Matomo tracking response', [
-                    'status' => $status,
-                    'responseBody' => mb_substr($body, 0, 500),
-                    'endpoint' => $matomoUrl,
-                    'payload' => $safeData,
-                ]);
-            }
+            $this->logger->info('Matomo tracking response', [
+                'status' => $status,
+                'responseBody' => mb_substr($body, 0, 500),
+                'endpoint' => $matomoUrl,
+                'payload' => $safeData,
+            ]);
 
             if ($status >= 200 && $status < 300) {
                 return; // success
@@ -128,14 +120,12 @@ class TrackHandler
             throw new \RuntimeException('Matomo returned HTTP ' . $status . ' for tracking payload');
         } catch (\Throwable $e) {
             $safeData = $this->sanitizeDataForLog($data);
-            if ($this->logger && $this->isLoggingEnabled()) {
-                $this->logger->error('Matomo tracking request error (transport/other)', [
-                    'exception' => $e::class,
-                    'message' => $e->getMessage(),
-                    'endpoint' => $matomoUrl,
-                    'payload' => $safeData,
-                ]);
-            }
+            $this->logger->error('Matomo tracking request error (transport/other)', [
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+                'endpoint' => $matomoUrl,
+                'payload' => $safeData,
+            ]);
             throw $e; // let worker handle retries for transient issues
         }
     }
@@ -161,10 +151,6 @@ class TrackHandler
         return '';
     }
 
-    private function isLoggingEnabled(): bool
-    {
-        return $this->systemConfigService->getBool('TinectMatomo.config.enableLogger');
-    }
 
     private function sanitizeDataForLog(array $data): array
     {

@@ -19,18 +19,14 @@
             </call>
         </service>
 
-        <!-- Custom Matomo logger -->
-        <service id="Tinect\Matomo\Logger\MatomoLoggerFactory">
-            <argument type="service" id="kernel"/>
-        </service>
-
-        <service id="tinect.matomo.logger" class="Monolog\Logger">
-            <factory service="Tinect\Matomo\Logger\MatomoLoggerFactory" method="create"/>
+        <service id="Tinect\Matomo\Service\ConditionalLogger">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="monolog.logger.tinect_matomo"/>
         </service>
 
         <service id="Tinect\Matomo\MessageQueue\TrackHandler">
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
-            <argument type="service" id="tinect.matomo.logger"/>
+            <argument type="service" id="Tinect\Matomo\Service\ConditionalLogger"/>
             <tag name="messenger.message_handler" />
         </service>
     </services>
