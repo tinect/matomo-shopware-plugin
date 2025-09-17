@@ -4,8 +4,6 @@ monolog:
   handlers:
     tinectMatomoLogHAndler:
       type: rotating_file
-      # Approximate previous MatomoLoggerFactory target under the kernel logs directory
-      # Previous used a dated subdirectory; here we use a rotating file with env in the name.
       path: "%kernel.logs_dir%/tinect_matomo_%kernel.environment%.log"
       level: info
       max_files: 30
