@@ -2,7 +2,7 @@ monolog:
   channels: ['tinect_matomo']
 
   handlers:
-    tinectMatomoLogHAndler:
+    tinectMatomoLogHandler:
       type: rotating_file
       path: "%kernel.logs_dir%/tinect_matomo_%kernel.environment%.log"
       level: info
