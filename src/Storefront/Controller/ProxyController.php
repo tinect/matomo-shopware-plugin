@@ -37,9 +37,8 @@ class ProxyController extends AbstractController
         $response->headers->set('x-robots-tag', 'noindex,follow');
 
         $matomoServer = StaticHelper::getMatomoUrl($this->systemConfigService);
-        $matomoJsUrl = StaticHelper::getMatomoJsEndpoint($this->systemConfigService);
 
-        if ($matomoServer === null || $matomoJsUrl === null) {
+        if ($matomoServer === null) {
             $response->setStatusCode(Response::HTTP_FORBIDDEN);
 
             return $response;
@@ -55,7 +54,7 @@ class ProxyController extends AbstractController
         }
 
         if (empty($parameters)) {
-            return $this->requestJs($response, $matomoJsUrl);
+            return $this->requestJs($response);
         }
 
         $this->messageBus->dispatch(new TrackMessage(
@@ -69,8 +68,15 @@ class ProxyController extends AbstractController
         return $response;
     }
 
-    private function requestJs(Response $response, string $matomoJsUrl): Response
+    private function requestJs(Response $response): Response
     {
+        $matomoJsUrl = StaticHelper::getMatomoJsEndpoint($this->systemConfigService);
+        if ($matomoJsUrl === null) {
+            $response->setStatusCode(Response::HTTP_FORBIDDEN);
+
+            return $response;
+        }
+
         $modifiedSince = 0;
         if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
             $modifiedSince = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
