@@ -109,11 +109,11 @@ class TrackHandler
 
             // treat 4xx as unrecoverable to avoid endless retries
             if ($status >= 400 && $status < 500) {
-                throw new UnrecoverableMessageHandlingException('Matomo returned HTTP ' . $status . ' for tracking payload');
+                throw new UnrecoverableMessageHandlingException('Matomo returned HTTP ' . $status . ' with body: ' . mb_substr($body, 0, 500));
             }
 
             // For 5xx and other unexpected statuses, throw to let worker retry
-            throw new \RuntimeException('Matomo returned HTTP ' . $status . ' for tracking payload');
+            throw new \RuntimeException('Matomo returned HTTP ' . $status . ' with body: ' . mb_substr($body, 0, 500));
         } catch (\Throwable $e) {
             $safeData = $this->sanitizeDataForLog($data);
             $this->logger->error('Matomo tracking request error (transport/other)', [
