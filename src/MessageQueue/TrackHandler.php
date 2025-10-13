@@ -58,11 +58,6 @@ class TrackHandler
                 'body' => $parameter,
             ];
         } else {
-            // Normal tracking: merge common parameters into form params and drop empty-string values
-            if (!\is_array($parameter)) {
-                $parameter = [];
-            }
-
             $merged = array_merge($parameter, $commonParameters);
             // Remove empty-string values to avoid invalid parameters like _id=""
             $merged = array_filter($merged, static function ($v) {
@@ -140,16 +135,9 @@ class TrackHandler
                 $request .= '&' . \http_build_query($queryParameters);
             }
             unset($request);
-
         }
 
-        $result = \json_encode($parameter, JSON_THROW_ON_ERROR);
-
-        if (is_string($result)) {
-            return $result;
-        }
-
-        return '';
+        return \json_encode($parameter, JSON_THROW_ON_ERROR);
     }
 
     private function sanitizeDataForLog(array $data): array
