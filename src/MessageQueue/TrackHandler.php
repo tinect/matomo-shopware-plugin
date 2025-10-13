@@ -142,16 +142,18 @@ class TrackHandler
 
     private function sanitizeDataForLog(array $data): array
     {
+        $sanitizeFields = ['token_auth'];
         $copy = $data;
-        if (isset($copy['form_params']) && is_array($copy['form_params'])) {
-            if (array_key_exists('token_auth', $copy['form_params'])) {
-                $copy['form_params']['token_auth'] = '***redacted***';
+
+        foreach ($sanitizeFields as $field) {
+            if (isset($copy['form_params'][$field])) {
+                $copy['form_params'][$field] = '***redacted***';
+            }
+            if (isset($copy['body']) && is_string($copy['body'])) {
+                $copy['body'] = preg_replace('/' . $field . '=[^&"]+/i', $field . '=***redacted***', $copy['body']);
             }
         }
-        if (isset($copy['body']) && is_string($copy['body'])) {
-            // mask token_auth values inside bulk body
-            $copy['body'] = preg_replace('/token_auth=[^&"]+/i', 'token_auth=***redacted***', $copy['body']);
-        }
+
         return $copy;
     }
 }
