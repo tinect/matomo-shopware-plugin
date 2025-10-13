@@ -3,12 +3,11 @@
 namespace Tinect\Matomo\MessageQueue;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use Shopware\Core\System\SystemConfig\SystemConfigService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
-use Tinect\Matomo\Service\StaticHelper;
 use Tinect\Matomo\Service\ConditionalLogger;
+use Tinect\Matomo\Service\StaticHelper;
 
 #[AsMessageHandler]
 class TrackHandler
@@ -25,6 +24,7 @@ class TrackHandler
 
         if ($authToken === '') {
             $this->logger->error('No auth token configured for Matomo tracking.');
+
             return;
         }
 
@@ -32,6 +32,7 @@ class TrackHandler
 
         if ($matomoUrl === null) {
             $this->logger->error('No matomo url configured for Matomo tracking.');
+
             return;
         }
 
@@ -128,16 +129,16 @@ class TrackHandler
 
     private function enrichRequests(string $parameter, array $queryParameters): string
     {
-        $parameter = \json_decode($parameter, true, 512, JSON_THROW_ON_ERROR);
+        $parameter = \json_decode($parameter, true, 512, \JSON_THROW_ON_ERROR);
 
-        if (isset($parameter['requests']) && is_array($parameter['requests'])) {
+        if (isset($parameter['requests']) && \is_array($parameter['requests'])) {
             foreach ($parameter['requests'] as &$request) {
                 $request .= '&' . \http_build_query($queryParameters);
             }
             unset($request);
         }
 
-        return \json_encode($parameter, JSON_THROW_ON_ERROR);
+        return \json_encode($parameter, \JSON_THROW_ON_ERROR);
     }
 
     private function sanitizeDataForLog(array $data): array
@@ -149,7 +150,7 @@ class TrackHandler
             if (isset($copy['form_params'][$field])) {
                 $copy['form_params'][$field] = '***redacted***';
             }
-            if (isset($copy['body']) && is_string($copy['body'])) {
+            if (isset($copy['body']) && \is_string($copy['body'])) {
                 $copy['body'] = preg_replace('/' . $field . '=[^&"]+/i', $field . '=***redacted***', $copy['body']);
             }
         }

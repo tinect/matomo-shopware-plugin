@@ -1,9 +1,14 @@
 export default class MatomoAnalyticsPlugin extends window.PluginBaseClass {
     init() {
         this.cookieEnabledName = 'matomo-analytics-enabled';
-        window.matomoCookieActive = Boolean(this.getCookieItem(this.cookieEnabledName));
+        window.matomoCookieActive = Boolean(
+            this.getCookieItem(this.cookieEnabledName)
+        );
 
-        document.$emitter.subscribe('CookieConfiguration_Update', this.handleCookies.bind(this));
+        document.$emitter.subscribe(
+            'CookieConfiguration_Update',
+            this.handleCookies.bind(this)
+        );
 
         window.mTrackCall();
     }
@@ -11,7 +16,12 @@ export default class MatomoAnalyticsPlugin extends window.PluginBaseClass {
     handleCookies(cookieUpdateEvent) {
         const updatedCookies = cookieUpdateEvent.detail;
 
-        if (!Object.prototype.hasOwnProperty.call(updatedCookies, this.cookieEnabledName)) {
+        if (
+            !Object.prototype.hasOwnProperty.call(
+                updatedCookies,
+                this.cookieEnabledName
+            )
+        ) {
             return;
         }
 
@@ -26,7 +36,7 @@ export default class MatomoAnalyticsPlugin extends window.PluginBaseClass {
         const allCookies = document.cookie.split(';');
         const gaCookieRegex = /^(_pk)/;
 
-        allCookies.forEach(cookie => {
+        allCookies.forEach((cookie) => {
             const cookieName = cookie.split('=')[0].trim();
             if (!cookieName.match(gaCookieRegex)) {
                 return;

@@ -18,13 +18,17 @@ readonly class ConditionalLogger
         return $this->systemConfigService->getBool('TinectMatomo.config.enableDebugLogger');
     }
 
-    /** @param array<string, mixed> $context */
+    /**
+     * @param array<string, mixed> $context
+     */
     public function error(string $message, array $context = []): void
     {
         $this->logger->error($message, $context);
     }
 
-    /** @param array<string, mixed> $context */
+    /**
+     * @param array<string, mixed> $context
+     */
     public function debug(string $message, array $context = []): void
     {
         $this->logger->debug($message, $context);

@@ -1,10 +1,10 @@
 monolog:
-  channels: ['tinect_matomo']
+    channels: ['tinect_matomo']
 
-  handlers:
-    tinectMatomoLogHandler:
-      type: rotating_file
-      path: "%kernel.logs_dir%/tinect_matomo_%kernel.environment%.log"
-      level: debug
-      max_files: 30
-      channels: [ 'tinect_matomo' ]
+    handlers:
+        tinectMatomoLogHandler:
+            type: rotating_file
+            path: '%kernel.logs_dir%/tinect_matomo_%kernel.environment%.log'
+            level: debug
+            max_files: 30
+            channels: ['tinect_matomo']
