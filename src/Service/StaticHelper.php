@@ -8,10 +8,16 @@ class StaticHelper
 {
     public static function getMatomoUrl(SystemConfigService $systemConfigService): ?string
     {
-        $matomoServer = $systemConfigService->getString('TinectMatomo.config.matomoserver');
+        $matomoServer = \trim(
+            \rtrim($systemConfigService->getString('TinectMatomo.config.matomoserver'), '/')
+        );
 
         if ($matomoServer === '') {
             return null;
+        }
+
+        if (\str_ends_with($matomoServer, 'matomo.php') || \str_ends_with($matomoServer, 'matomo.js')) {
+            $matomoServer = \preg_replace('/\/(matomo\.php|matomo\.js)$/', '', $matomoServer);
         }
 
         return \rtrim($matomoServer, '/') . '/';
@@ -19,33 +25,21 @@ class StaticHelper
 
     public static function getMatomoPhpEndpoint(SystemConfigService $systemConfigService): ?string
     {
-        $configured = $systemConfigService->getString('TinectMatomo.config.matomoserver');
-        if ($configured === '') {
-            return null;
+        $phpTrackingPath = $systemConfigService->getString('TinectMatomo.config.phpTrackingPath');
+        if ($phpTrackingPath === '') {
+            $phpTrackingPath = 'matomo.php';
         }
 
-        $configured = trim($configured);
-        // If already points to matomo.php (with or without trailing slash), use as-is without trailing slash
-        if (preg_match('/matomo\.php(\/.+)?$/i', $configured)) {
-            return rtrim($configured, '/');
-        }
-
-        return rtrim($configured, '/') . '/matomo.php';
+        return self::getMatomoUrl($systemConfigService) . $phpTrackingPath;
     }
 
     public static function getMatomoJsEndpoint(SystemConfigService $systemConfigService): ?string
     {
-        $configured = $systemConfigService->getString('TinectMatomo.config.matomoserver');
-        if ($configured === '') {
-            return null;
+        $jsTrackingPath = $systemConfigService->getString('TinectMatomo.config.jsTrackingPath');
+        if ($jsTrackingPath === '') {
+            $jsTrackingPath = 'matomo.js';
         }
 
-        $configured = trim($configured);
-        // If already points to matomo.js (with or without trailing slash), use as-is without trailing slash
-        if (preg_match('/matomo\.js(\/.+)?$/i', $configured)) {
-            return rtrim($configured, '/');
-        }
-
-        return rtrim($configured, '/') . '/matomo.js';
+        return self::getMatomoUrl($systemConfigService) . $jsTrackingPath;
     }
 }
