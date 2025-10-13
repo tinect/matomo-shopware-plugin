@@ -47,7 +47,7 @@ class ProxyController extends AbstractController
         $parameters = $request->query->all();
 
         if (empty($parameters)) {
-            $givenContent = $request->getContent();;
+            $givenContent = $request->getContent();
             if (\is_string($givenContent)) {
                 $parameters = $givenContent;
             }
