@@ -35,9 +35,7 @@ class TrackHandler
             return;
         }
 
-        // Build parameters that must accompany every request
         $commonParameters = [];
-        // Matomo Tracking API version: required by API
         $commonParameters['apiv'] = 1;
         $commonParameters['cdt'] = $message->unixTimestamp;
         $commonParameters['token_auth'] = $authToken;
@@ -98,14 +96,17 @@ class TrackHandler
 
             $status = $response->getStatusCode();
             $body = (string) $response->getBody();
-            // sanitize data before logging (redact token_auth)
-            $safeData = $this->sanitizeDataForLog($data);
-            $this->logger->info('Matomo tracking response', [
-                'status' => $status,
-                'responseBody' => mb_substr($body, 0, 500),
-                'endpoint' => $matomoUrl,
-                'payload' => $safeData,
-            ]);
+
+            if ($this->logger->isDebugEnabled()) {
+                // sanitize data before logging (redact token_auth)
+                $safeData = $this->sanitizeDataForLog($data);
+                $this->logger->debug('Matomo tracking response', [
+                    'status' => $status,
+                    'responseBody' => mb_substr($body, 0, 500),
+                    'endpoint' => $matomoUrl,
+                    'payload' => $safeData,
+                ]);
+            }
 
             if ($status >= 200 && $status < 300) {
                 return; // success
@@ -150,7 +151,6 @@ class TrackHandler
 
         return '';
     }
-
 
     private function sanitizeDataForLog(array $data): array
     {
