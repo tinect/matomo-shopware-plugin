@@ -4,6 +4,6 @@
     {{ parent() }}
 
     {% if not config('TinectMatomo.config.activateProxyTracking') %}
-        <link rel="preconnect" crossorigin href="//{{ config("TinectMatomo.config.matomoserver") }}">
+        <link rel="preconnect" crossorigin href="{{ config("TinectMatomo.config.matomoserver") }}">
     {% endif %}
 {% endblock %}
