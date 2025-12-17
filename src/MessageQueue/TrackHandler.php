@@ -51,8 +51,12 @@ class TrackHandler
             // Bulk tracking payload: enrich each request; do NOT also put params on URL
             try {
                 $parameter = $this->enrichRequests($parameter, $commonParameters);
-            } catch (\JsonException) {
-                $this->logger->error('No matomo url configured for Matomo tracking.');
+            } catch (\JsonException $exception) {
+                $this->logger->error('Error enriching request.', [
+                    'parameter' => $parameter,
+                    'commonParameters' => $commonParameters,
+                    'message' => $exception->getMessage(),
+                ]);
             }
 
             $data = [
