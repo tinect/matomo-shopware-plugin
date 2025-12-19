@@ -51,18 +51,19 @@ class TrackHandler
             // Bulk tracking payload: enrich each request; do NOT also put params on URL
             try {
                 $parameter = $this->enrichRequests($parameter, $commonParameters);
-            } catch (\JsonException $exception) {
-                $this->logger->error('Error enriching request.', [
-                    'parameter' => $parameter,
-                    'commonParameters' => $commonParameters,
-                    'message' => $exception->getMessage(),
-                ]);
+            } catch (\JsonException) {
+                parse_str($parameter, $parsedQuery);
+                if ($parsedQuery !== []) {
+                    $parameter = $parsedQuery;
+                }
             }
 
             $data = [
                 'body' => $parameter,
             ];
-        } else {
+        }
+
+        if (\is_array($parameter)) {
             $merged = array_merge($parameter, $commonParameters);
             // Remove empty-string values to avoid invalid parameters like _id=""
             $merged = array_filter($merged, static function ($v) {
@@ -72,6 +73,14 @@ class TrackHandler
             $data = [
                 'form_params' => $merged,
             ];
+        }
+
+        if (!isset($data)) {
+            $this->logger->error('Parameters for Matomo tracking could not be handled.', [
+                'parameters' => $message->parameters,
+            ]);
+
+            throw new \RuntimeException('Parameters for Matomo tracking could not be handled.');
         }
 
         $client = new Client();
