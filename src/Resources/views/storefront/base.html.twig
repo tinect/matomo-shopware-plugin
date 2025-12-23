@@ -74,7 +74,7 @@
         {% if matomoServer %}
             {% if config('TinectMatomo.config.activateProxyTracking') %}
                 {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
-                {% set trackerJsSrc = seoUrl('frontend.matomo.proxy') %}
+                {% set trackerJsSrc = seoUrl('frontend.matomo.js') %}
             {% else %}
                 {% set trackerUrl = matomoServer ~ '/' ~ (config('TinectMatomo.config.phpTrackingPath') ?: 'matomo.php') %}
                 {% set trackerJsSrc = matomoServer ~ '/' ~ (config('TinectMatomo.config.jsTrackingPath') ?: 'matomo.js') %}

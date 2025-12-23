@@ -39,9 +39,7 @@ class ProxyController extends AbstractController
         $matomoServer = StaticHelper::getMatomoUrl($this->systemConfigService);
 
         if ($matomoServer === null) {
-            $response->setStatusCode(Response::HTTP_FORBIDDEN);
-
-            return $response;
+            return $response->setStatusCode(Response::HTTP_FORBIDDEN);
         }
 
         $parameters = $request->query->all();
@@ -51,10 +49,6 @@ class ProxyController extends AbstractController
             if (\is_string($givenContent)) {
                 $parameters = $givenContent;
             }
-        }
-
-        if (empty($parameters)) {
-            return $this->requestJs($response);
         }
 
         $this->messageBus->dispatch(new TrackMessage(
@@ -68,13 +62,14 @@ class ProxyController extends AbstractController
         return $response;
     }
 
-    private function requestJs(Response $response): Response
+    #[Route(path: '/mtmtrpr.js', name: 'frontend.matomo.js', methods: ['GET'])]
+    public function matomoProxyJS(): Response
     {
+        $response = new Response();
+
         $matomoJsUrl = StaticHelper::getMatomoJsEndpoint($this->systemConfigService);
         if ($matomoJsUrl === null) {
-            $response->setStatusCode(Response::HTTP_FORBIDDEN);
-
-            return $response;
+            return $response->setStatusCode(Response::HTTP_FORBIDDEN);
         }
 
         $modifiedSince = 0;
@@ -91,9 +86,7 @@ class ProxyController extends AbstractController
         $response->headers->set('Vary', 'Accept-Encoding');
 
         if ($modifiedSince && $modifiedSince > (time() - $this->cacheTime)) {
-            $response->setStatusCode(Response::HTTP_NOT_MODIFIED);
-
-            return $response;
+            return $response->setStatusCode(Response::HTTP_NOT_MODIFIED);
         }
 
         $response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
