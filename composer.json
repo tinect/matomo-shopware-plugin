@@ -1,6 +1,6 @@
 {
     "name": "tinect/matomo",
-    "version": "5.0.2",
+    "version": "6.0.0",
     "description": "Matomo plugin for shopware 6",
     "type": "shopware-platform-plugin",
     "license": "MIT",
