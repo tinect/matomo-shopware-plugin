@@ -39,16 +39,13 @@ class ProxyController extends AbstractController
         $matomoServer = StaticHelper::getMatomoUrl($this->systemConfigService);
 
         if ($matomoServer === null) {
-            return $response->setStatusCode(Response::HTTP_FORBIDDEN);
+            return $response->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $parameters = $request->query->all();
+        $parameters = $this->getParameters($request);
 
         if (empty($parameters)) {
-            $givenContent = $request->getContent();
-            if (\is_string($givenContent)) {
-                $parameters = $givenContent;
-            }
+            return $response->setStatusCode(Response::HTTP_BAD_REQUEST);
         }
 
         $this->messageBus->dispatch(new TrackMessage(
@@ -69,7 +66,7 @@ class ProxyController extends AbstractController
 
         $matomoJsUrl = StaticHelper::getMatomoJsEndpoint($this->systemConfigService);
         if ($matomoJsUrl === null) {
-            return $response->setStatusCode(Response::HTTP_FORBIDDEN);
+            return $response->setStatusCode(Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
         $modifiedSince = 0;
@@ -112,5 +109,19 @@ class ProxyController extends AbstractController
         }
 
         return $response;
+    }
+
+    private function getParameters(Request $request): string|array
+    {
+        $parameters = $request->query->all();
+
+        if (empty($parameters)) {
+            $givenContent = $request->getContent();
+            if (\is_string($givenContent)) {
+                $parameters = $givenContent;
+            }
+        }
+
+        return $parameters;
     }
 }
