@@ -3,92 +3,94 @@
 {% block base_body %}
     {{ parent() }}
 
-    <script>
-        window._paq = window._paq || [];
+    {% block tinect_matomo_script %}
+        <script>
+            window._paq = window._paq || [];
 
-        window._paq.push(['enableHeartBeatTimer']);
+            window._paq.push(['enableHeartBeatTimer']);
 
-        {% if activeRoute == 'frontend.detail.page' %}
-            window._paq.push([
-                'setEcommerceView',
-                '{{ page.product.productNumber|escape('js') }}',
-                '{{ page.product.name|escape('js') }}',
-                ''
-            ]);
-        {% endif %}
-
-        {% if page.cart is defined %}
-            {% for item in page.cart.lineItems.elements %}
+            {% if activeRoute == 'frontend.detail.page' %}
                 window._paq.push([
-                    'addEcommerceItem',
-                    '{{ item.payload['productNumber'] }}',
-                    '{{ item.label }}',
-                    '',
-                    {{ item.price.unitPrice }},
-                    '{{ item.quantity }}',
+                    'setEcommerceView',
+                    '{{ page.product.productNumber|escape('js') }}',
+                    '{{ page.product.name|escape('js') }}',
+                    ''
                 ]);
-            {% endfor %}
-            window._paq.push([
-                'trackEcommerceCartUpdate',
-                {{ page.cart.price.totalPrice }}
-            ]);
-        {% elseif page.order is defined %}
-            {% for item in page.order.lineItems.elements %}
-                window._paq.push([
-                    'addEcommerceItem',
-                    '{{ item.payload['productNumber'] }}',
-                    '{{ item.label }}',
-                    '',
-                    {{ item.unitPrice }},
-                    '{{ item.quantity }}',
-                ]);
-            {% endfor %}
-            window._paq.push([
-                'trackEcommerceOrder',
-                '{{ page.order.orderNumber }}',
-                {{ page.order.amountTotal }},
-                {{ page.order.positionPrice }},
-                {{ page.order.amountTotal - page.order.amountNet }},
-                {{ page.order.shippingTotal }},
-                false
-            ]);
-        {% elseif activeRoute is same as('frontend.search.page') %}
-            window._paq.push(['trackSiteSearch',
-                '{{ page.searchTerm|escape('js') }}',
-                'searchPage',
-                {{ page.listing.total }}
-            ]);
-        {% endif %}
+            {% endif %}
 
-        window.mTrackCall = function() {
-            if (!window.matomoCookieActive) {
-                window._paq.push(['disableCookies']);
+            {% if page.cart is defined %}
+                {% for item in page.cart.lineItems.elements %}
+                    window._paq.push([
+                        'addEcommerceItem',
+                        '{{ item.payload['productNumber'] }}',
+                        '{{ item.label }}',
+                        '',
+                        {{ item.price.unitPrice }},
+                        '{{ item.quantity }}',
+                    ]);
+                {% endfor %}
+                window._paq.push([
+                    'trackEcommerceCartUpdate',
+                    {{ page.cart.price.totalPrice }}
+                ]);
+            {% elseif page.order is defined %}
+                {% for item in page.order.lineItems.elements %}
+                    window._paq.push([
+                        'addEcommerceItem',
+                        '{{ item.payload['productNumber'] }}',
+                        '{{ item.label }}',
+                        '',
+                        {{ item.unitPrice }},
+                        '{{ item.quantity }}',
+                    ]);
+                {% endfor %}
+                window._paq.push([
+                    'trackEcommerceOrder',
+                    '{{ page.order.orderNumber }}',
+                    {{ page.order.amountTotal }},
+                    {{ page.order.positionPrice }},
+                    {{ page.order.amountTotal - page.order.amountNet }},
+                    {{ page.order.shippingTotal }},
+                    false
+                ]);
+            {% elseif activeRoute is same as('frontend.search.page') %}
+                window._paq.push(['trackSiteSearch',
+                    '{{ page.searchTerm|escape('js') }}',
+                    'searchPage',
+                    {{ page.listing.total }}
+                ]);
+            {% endif %}
+
+            window.mTrackCall = function() {
+                if (!window.matomoCookieActive) {
+                    window._paq.push(['disableCookies']);
+                }
+                {% if activeRoute is not same as('frontend.search.page') %}
+                    window._paq.push(['trackPageView']);
+                {% endif %}
+                window._paq.push(['enableLinkTracking']);
             }
-            {% if activeRoute is not same as('frontend.search.page') %}
-                window._paq.push(['trackPageView']);
-            {% endif %}
-            window._paq.push(['enableLinkTracking']);
-        }
 
-        {% set matomoServer = config('TinectMatomo.config.matomoserver') %}
-        {% if matomoServer %}
-            {% if config('TinectMatomo.config.activateProxyTracking') %}
-                {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
-                {% set trackerJsSrc = seoUrl('frontend.matomo.js') %}
-            {% else %}
-                {% set trackerUrl = matomoServer ~ '/' ~ (config('TinectMatomo.config.phpTrackingPath') ?: 'matomo.php') %}
-                {% set trackerJsSrc = matomoServer ~ '/' ~ (config('TinectMatomo.config.jsTrackingPath') ?: 'matomo.js') %}
-            {% endif %}
+            {% set matomoServer = config('TinectMatomo.config.matomoserver') %}
+            {% if matomoServer %}
+                {% if config('TinectMatomo.config.activateProxyTracking') %}
+                    {% set trackerUrl = seoUrl('frontend.matomo.proxy') %}
+                    {% set trackerJsSrc = seoUrl('frontend.matomo.js') %}
+                {% else %}
+                    {% set trackerUrl = matomoServer ~ '/' ~ (config('TinectMatomo.config.phpTrackingPath') ?: 'matomo.php') %}
+                    {% set trackerJsSrc = matomoServer ~ '/' ~ (config('TinectMatomo.config.jsTrackingPath') ?: 'matomo.js') %}
+                {% endif %}
 
-            window._paq.push(['setTrackerUrl', '{{ trackerUrl }}']);
-            window._paq.push(['setSiteId', '{{ config('TinectMatomo.config.matomosite') }}']);
-            (function () {
-                const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
-                g.type = 'text/javascript';
-                g.async = true;
-                g.src = '{{ trackerJsSrc }}';
-                s.parentNode.insertBefore(g, s);
-            })();
-        {% endif %}
-    </script>
+                window._paq.push(['setTrackerUrl', '{{ trackerUrl }}']);
+                window._paq.push(['setSiteId', '{{ config('TinectMatomo.config.matomosite') }}']);
+                (function () {
+                    const d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+                    g.type = 'text/javascript';
+                    g.async = true;
+                    g.src = '{{ trackerJsSrc }}';
+                    s.parentNode.insertBefore(g, s);
+                })();
+            {% endif %}
+        </script>
+    {% endblock %}
 {% endblock %}
