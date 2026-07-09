@@ -30,7 +30,7 @@ class StaticHelper
             $phpTrackingPath = 'matomo.php';
         }
 
-        return self::getMatomoUrl($systemConfigService) . $phpTrackingPath;
+        return self::getMatomoUrl($systemConfigService) . \ltrim($phpTrackingPath, '/');
     }
 
     public static function getMatomoJsEndpoint(SystemConfigService $systemConfigService): ?string
@@ -40,6 +40,6 @@ class StaticHelper
             $jsTrackingPath = 'matomo.js';
         }
 
-        return self::getMatomoUrl($systemConfigService) . $jsTrackingPath;
+        return self::getMatomoUrl($systemConfigService) . \ltrim($jsTrackingPath, '/');
     }
 }
