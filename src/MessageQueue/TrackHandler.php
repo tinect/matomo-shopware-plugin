@@ -121,21 +121,42 @@ class TrackHandler
                 return; // success
             }
 
-            // treat 4xx as unrecoverable to avoid endless retries
-            if ($status >= 400 && $status < 500) {
+            // Matomo answers cip/token-authenticated tracking requests that it
+            // transiently rejects (e.g. token not accepted at that moment) with an
+            // HTTP 400 carrying its "This resource is part of Matomo" landing page
+            // and records nothing. This is retryable: the same request usually
+            // succeeds against a healthy Matomo, and ecommerce re-sends are
+            // idempotent (Matomo deduplicates orders by ec_id).
+            $isEmptyRequestResponse = $status === 400
+                && stripos($body, 'This resource is part of Matomo') !== false;
+
+            // Treat genuinely permanent 4xx (403/404/413/...) as unrecoverable to
+            // avoid endless retries; the transient "empty request" 400 falls through.
+            if ($status >= 400 && $status < 500 && !$isEmptyRequestResponse) {
                 throw new UnrecoverableMessageHandlingException('Matomo returned HTTP ' . $status . ' with body: ' . mb_substr($body, 0, 500));
             }
 
-            // For 5xx and other unexpected statuses, throw to let worker retry
+            // For 5xx, unexpected statuses, and the transient "empty request" 400,
+            // throw a retryable exception so the worker retries with backoff.
             throw new \RuntimeException('Matomo returned HTTP ' . $status . ' with body: ' . mb_substr($body, 0, 500));
         } catch (\Throwable $e) {
             $safeData = $this->sanitizeDataForLog($data);
-            $this->logger->error('Matomo tracking request error (transport/other)', [
+            $context = [
                 'exception' => $e::class,
                 'message' => $e->getMessage(),
                 'endpoint' => $matomoUrl,
                 'payload' => $safeData,
-            ]);
+            ];
+
+            // Unrecoverable failures are given up on (dead-lettered) -> ERROR.
+            // Everything else is transient and will be retried by the worker,
+            // so log at WARNING to avoid alarming on self-healing hiccups.
+            if ($e instanceof UnrecoverableMessageHandlingException) {
+                $this->logger->error('Matomo tracking request error (unrecoverable)', $context);
+            } else {
+                $this->logger->warning('Matomo tracking request error (transient, will retry)', $context);
+            }
+
             throw $e; // let worker handle retries for transient issues
         }
     }
