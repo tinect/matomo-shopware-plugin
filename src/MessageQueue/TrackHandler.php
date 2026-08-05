@@ -88,7 +88,11 @@ class TrackHandler
         // Build headers and set JSON content type when sending bulk payload
         $headers = [
             'User-Agent' => $message->userAgent,
-            'Accept-Language' => str_replace(["\n", "\t", "\r"], '', $message->acceptLanguage),
+            'Accept-Language' => mb_substr(
+                preg_replace('/[^\x20-\x7E,;=\-]/', '', $message->acceptLanguage),
+                0,
+                255
+            ),
         ];
         if (isset($data['body'])) {
             $headers['Content-Type'] = 'application/json';
