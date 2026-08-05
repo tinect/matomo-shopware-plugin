@@ -151,6 +151,7 @@ class TrackHandler
                 'message' => $e->getMessage(),
                 'endpoint' => $matomoUrl,
                 'payload' => $safeData,
+                'headers' => $headers,
             ];
 
             // Unrecoverable failures are given up on (dead-lettered) -> ERROR.
