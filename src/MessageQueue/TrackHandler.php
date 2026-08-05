@@ -118,6 +118,7 @@ class TrackHandler
                     'responseBody' => mb_substr($body, 0, 500),
                     'endpoint' => $matomoUrl,
                     'payload' => $safeData,
+                    'headers' => $headers,
                 ]);
             }
 
