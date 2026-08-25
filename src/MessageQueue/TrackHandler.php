@@ -159,6 +159,9 @@ class TrackHandler
             // so log at WARNING to avoid alarming on self-healing hiccups.
             if ($e instanceof UnrecoverableMessageHandlingException) {
                 $this->logger->error('Matomo tracking request error (unrecoverable)', $context);
+
+                // we just return here, we don't want to also spam the messenger-logger
+                return;
             } else {
                 $this->logger->warning('Matomo tracking request error (transient, will retry)', $context);
             }
